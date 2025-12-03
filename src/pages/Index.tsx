@@ -33,6 +33,7 @@ const Index = () => {
   // Tasks
   const {
     filteredTasks,
+    loading,
     addTask,
     updateTask,
     deleteTask,
@@ -51,8 +52,8 @@ const Index = () => {
     addTask(title, desc, due, priority);
   }, [addTask]);
 
-  const handleDeleteTask = useCallback((id: string) => {
-    const task = deleteTask(id);
+  const handleDeleteTask = useCallback(async (id: string) => {
+    const task = await deleteTask(id);
     if (task) {
       setDeletedTask(task);
     }
@@ -145,6 +146,7 @@ const Index = () => {
 
         <TaskList
           tasks={filteredTasks}
+          loading={loading}
           onToggle={toggleTask}
           onEdit={handleEditTask}
           onDelete={handleDeleteTask}
