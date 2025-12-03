@@ -2,7 +2,6 @@ import { useCallback, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Task, FilterType, SortType, Priority } from '@/types/task';
 import { useLocalStorage } from './useLocalStorage';
-import { sampleTasks } from '@/utils/sampleData';
 import { filterTasks, sortTasks } from '@/utils/helpers';
 
 const STORAGE_KEY = 'todo-tasks';
@@ -28,7 +27,7 @@ export function useTasks(
   sortBy: SortType = 'date',
   searchQuery: string = ''
 ): UseTasksReturn {
-  const [tasks, setTasks] = useLocalStorage<Task[]>(STORAGE_KEY, sampleTasks);
+  const [tasks, setTasks] = useLocalStorage<Task[]>(STORAGE_KEY, []);
 
   const addTask = useCallback((
     title: string,
