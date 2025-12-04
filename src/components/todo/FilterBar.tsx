@@ -68,15 +68,15 @@ export const FilterBar = memo(function FilterBar({
       </div>
 
       {/* Filters and Sort */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
         {/* Filter Tabs */}
-        <div className="flex items-center gap-1 p-1 rounded-xl bg-muted/50">
+        <div className="flex items-center gap-1 p-1 rounded-xl bg-muted/50 overflow-x-auto">
           {filters.map(({ value, label }) => (
             <button
               key={value}
               onClick={() => onFilterChange(value)}
               className={cn(
-                'filter-tab relative',
+                'filter-tab relative whitespace-nowrap text-xs sm:text-sm',
                 filter === value && 'active'
               )}
               aria-pressed={filter === value}
@@ -106,15 +106,15 @@ export const FilterBar = memo(function FilterBar({
         </div>
 
         {/* Sort Dropdown */}
-        <div className="relative">
+        <div className="relative self-end sm:self-auto">
           <button
             onClick={() => setShowSortMenu(!showSortMenu)}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs sm:text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
             aria-haspopup="listbox"
             aria-expanded={showSortMenu}
           >
             <SortAsc className="w-4 h-4" />
-            Sort: {sortOptions.find(s => s.value === sortBy)?.label}
+            <span className="hidden xs:inline">Sort:</span> {sortOptions.find(s => s.value === sortBy)?.label}
           </button>
 
           {showSortMenu && (

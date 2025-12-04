@@ -97,7 +97,7 @@ export const TaskCard = memo(function TaskCard({
     >
       <div
         className={cn(
-          'task-card group relative flex gap-4 p-4 transition-all duration-200',
+          'task-card group relative flex gap-2 sm:gap-4 p-3 sm:p-4 transition-all duration-200',
           task.done && 'completed',
           isHovered && 'scale-[1.01]'
         )}
@@ -113,7 +113,7 @@ export const TaskCard = memo(function TaskCard({
         />
 
         {/* Drag handle (visual only for now) */}
-        <div className="flex items-center opacity-0 group-hover:opacity-50 transition-opacity cursor-grab">
+        <div className="hidden sm:flex items-center opacity-0 group-hover:opacity-50 transition-opacity cursor-grab">
           <GripVertical className="h-5 w-5 text-muted-foreground" />
         </div>
 
@@ -128,18 +128,18 @@ export const TaskCard = memo(function TaskCard({
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start justify-between gap-2 sm:gap-3">
             <div className="flex-1 min-w-0">
               <h3
                 className={cn(
-                  'task-title text-base font-medium text-foreground truncate transition-all',
+                  'task-title text-sm sm:text-base font-medium text-foreground truncate transition-all',
                   task.done && 'line-through text-muted-foreground'
                 )}
               >
                 {task.title}
               </h3>
               {task.desc && (
-                <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
+                <p className="mt-1 text-xs sm:text-sm text-muted-foreground line-clamp-2">
                   {task.desc}
                 </p>
               )}
@@ -148,15 +148,15 @@ export const TaskCard = memo(function TaskCard({
           </div>
 
           {/* Meta info */}
-          <div className="mt-3 flex items-center gap-4">
+          <div className="mt-2 sm:mt-3 flex items-center gap-4">
             {task.due && (
               <div
                 className={cn(
-                  'flex items-center gap-1.5 text-xs font-medium',
+                  'flex items-center gap-1.5 text-[10px] sm:text-xs font-medium',
                   isOverdue ? 'text-destructive' : 'text-muted-foreground'
                 )}
               >
-                <Calendar className="h-3.5 w-3.5" />
+                <Calendar className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                 <span>{dueDateFormatted}</span>
               </div>
             )}
@@ -165,7 +165,7 @@ export const TaskCard = memo(function TaskCard({
 
         {/* Actions */}
         <motion.div
-          className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+          className="flex items-center gap-0.5 sm:gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity"
           initial={false}
           animate={{ x: isHovered ? 0 : 10 }}
           transition={{ duration: 0.15 }}
