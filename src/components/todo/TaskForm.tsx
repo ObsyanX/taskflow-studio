@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, memo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, X, Calendar, Flag } from 'lucide-react';
+import { Plus, X, Calendar, Flag, Clock } from 'lucide-react';
 import { Priority } from '@/types/task';
 import { cn } from '@/lib/utils';
 
@@ -19,7 +19,8 @@ export const TaskForm = memo(function TaskForm({
 }: TaskFormProps) {
   const [title, setTitle] = useState('');
   const [desc, setDesc] = useState('');
-  const [due, setDue] = useState('');
+  const [dueDate, setDueDate] = useState('');
+  const [dueTime, setDueTime] = useState('');
   const [priority, setPriority] = useState<Priority>('Medium');
   const [error, setError] = useState('');
 
@@ -39,16 +40,23 @@ export const TaskForm = memo(function TaskForm({
       return;
     }
 
-    onSubmit(title, desc, due || null, priority);
+    // Combine date and time into ISO string
+    let dueDateTime: string | null = null;
+    if (dueDate) {
+      dueDateTime = dueTime ? `${dueDate}T${dueTime}:00` : `${dueDate}T00:00:00`;
+    }
+
+    onSubmit(title, desc, dueDateTime, priority);
     
     // Reset form
     setTitle('');
     setDesc('');
-    setDue('');
+    setDueDate('');
+    setDueTime('');
     setPriority('Medium');
     setError('');
     onToggleExpand();
-  }, [title, desc, due, priority, onSubmit, onToggleExpand]);
+  }, [title, desc, dueDate, dueTime, priority, onSubmit, onToggleExpand]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey && title.trim()) {
@@ -135,19 +143,33 @@ export const TaskForm = memo(function TaskForm({
                 aria-label="Task description"
               />
 
-              {/* Due Date & Priority */}
+              {/* Due Date, Time & Priority */}
               <div className="flex flex-wrap gap-3">
-                <div className="flex-1 min-w-[200px]">
+                <div className="flex-1 min-w-[140px]">
                   <label className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
                     <Calendar className="w-4 h-4" />
                     Due Date
                   </label>
                   <input
                     type="date"
-                    value={due}
-                    onChange={(e) => setDue(e.target.value)}
+                    value={dueDate}
+                    onChange={(e) => setDueDate(e.target.value)}
                     className="input-modern"
                     aria-label="Due date"
+                  />
+                </div>
+                <div className="flex-1 min-w-[120px]">
+                  <label className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                    <Clock className="w-4 h-4" />
+                    Due Time
+                  </label>
+                  <input
+                    type="time"
+                    value={dueTime}
+                    onChange={(e) => setDueTime(e.target.value)}
+                    className="input-modern"
+                    aria-label="Due time"
+                    disabled={!dueDate}
                   />
                 </div>
                 <div className="flex-1 min-w-[200px]">

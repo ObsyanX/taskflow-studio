@@ -5,11 +5,24 @@ export const formatDueDate = (dateStr: string | null): string => {
   if (!dateStr) return '';
   
   const date = parseISO(dateStr);
+  const hasTime = dateStr.includes('T') && !dateStr.endsWith('T00:00:00');
   
-  if (isToday(date)) return 'Today';
-  if (isTomorrow(date)) return 'Tomorrow';
+  let dateLabel: string;
+  if (isToday(date)) {
+    dateLabel = 'Today';
+  } else if (isTomorrow(date)) {
+    dateLabel = 'Tomorrow';
+  } else {
+    dateLabel = format(date, 'MMM d');
+  }
   
-  return format(date, 'MMM d');
+  // Add time if present and not midnight
+  if (hasTime) {
+    const timeStr = format(date, 'h:mm a');
+    return `${dateLabel} at ${timeStr}`;
+  }
+  
+  return dateLabel;
 };
 
 export const isDueDatePast = (dateStr: string | null): boolean => {
