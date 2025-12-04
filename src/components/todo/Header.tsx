@@ -23,20 +23,20 @@ export const Header = memo(function Header({
     : 0;
 
   return (
-    <header className="mb-8">
-      <div className="flex items-center justify-between mb-6">
+    <header className="mb-6 sm:mb-8">
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
         {/* Logo & Title */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <motion.div
-            className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center"
+            className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-primary/10 flex items-center justify-center"
             whileHover={{ scale: 1.05, rotate: 5 }}
             whileTap={{ scale: 0.95 }}
           >
-            <CheckCircle2 className="w-7 h-7 text-primary" />
+            <CheckCircle2 className="w-5 h-5 sm:w-7 sm:h-7 text-primary" />
           </motion.div>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">TaskFlow</h1>
-            <p className="text-sm text-muted-foreground">Stay organized, get things done</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-foreground">TaskFlow</h1>
+            <p className="text-xs sm:text-sm text-muted-foreground hidden xs:block">Stay organized, get things done</p>
           </div>
         </div>
 
@@ -55,7 +55,7 @@ export const Header = memo(function Header({
           <motion.button
             onClick={onToggleTheme}
             className={cn(
-              'relative w-12 h-12 rounded-xl flex items-center justify-center',
+              'relative w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center',
               'bg-muted hover:bg-muted/80 transition-colors'
             )}
             whileTap={{ scale: 0.9 }}

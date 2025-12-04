@@ -52,8 +52,8 @@ const Index = () => {
     addTask(title, desc, due, priority);
   }, [addTask]);
 
-  const handleDeleteTask = useCallback(async (id: string) => {
-    const task = await deleteTask(id);
+  const handleDeleteTask = useCallback((id: string) => {
+    const task = deleteTask(id);
     if (task) {
       setDeletedTask(task);
     }
@@ -119,7 +119,7 @@ const Index = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
-        className="relative z-10 mx-auto max-w-2xl px-4 py-8 sm:px-6 sm:py-12"
+        className="relative z-10 mx-auto max-w-2xl px-3 py-6 sm:px-6 sm:py-12"
       >
         <Header
           theme={theme}

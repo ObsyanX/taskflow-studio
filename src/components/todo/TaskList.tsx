@@ -61,9 +61,9 @@ export const TaskList = memo(function TaskList({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
-          className="text-muted-foreground text-center max-w-sm mb-8"
+          className="text-muted-foreground text-center max-w-sm mb-8 text-sm sm:text-base"
         >
-          Your tasks are saved in the cloud. Start by creating your first task below.
+          Your tasks are saved locally on this device. Start by creating your first task below.
         </motion.p>
 
         <motion.div 
