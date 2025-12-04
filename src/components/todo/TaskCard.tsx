@@ -1,6 +1,6 @@
 import React, { memo, useState, useRef, useCallback } from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
-import { Calendar, Edit2, Trash2, GripVertical } from 'lucide-react';
+import { Calendar, Edit2, Trash2, GripVertical, Check, RotateCcw } from 'lucide-react';
 import { Task } from '@/types/task';
 import { AnimatedCheckbox } from './AnimatedCheckbox';
 import { PriorityChip } from './PriorityChip';
@@ -170,6 +170,18 @@ export const TaskCard = memo(function TaskCard({
           animate={{ x: isHovered ? 0 : 10 }}
           transition={{ duration: 0.15 }}
         >
+          <button
+            onClick={handleToggle}
+            className={cn(
+              'btn-ghost',
+              task.done 
+                ? 'text-muted-foreground hover:text-foreground hover:bg-muted' 
+                : 'text-success hover:text-success hover:bg-success/10'
+            )}
+            aria-label={task.done ? `Mark "${task.title}" as incomplete` : `Mark "${task.title}" as complete`}
+          >
+            {task.done ? <RotateCcw className="h-4 w-4" /> : <Check className="h-4 w-4" />}
+          </button>
           <button
             onClick={handleEdit}
             className="btn-ghost"

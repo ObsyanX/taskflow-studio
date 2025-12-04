@@ -102,7 +102,7 @@ export const EditTaskDialog = memo(function EditTaskDialog({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 p-4"
+            className="fixed inset-x-3 sm:inset-x-auto sm:left-1/2 top-1/2 z-50 w-auto sm:w-full sm:max-w-lg sm:-translate-x-1/2 -translate-y-1/2"
             role="dialog"
             aria-modal="true"
             aria-labelledby="edit-task-title"
@@ -110,11 +110,11 @@ export const EditTaskDialog = memo(function EditTaskDialog({
           >
             <form
               onSubmit={handleSubmit}
-              className="rounded-2xl bg-card border border-border shadow-xl p-6 space-y-5"
+              className="rounded-2xl bg-card border border-border shadow-xl p-4 sm:p-6 space-y-4 sm:space-y-5 max-h-[90vh] overflow-y-auto"
             >
               {/* Header */}
               <div className="flex items-center justify-between">
-                <h2 id="edit-task-title" className="text-xl font-semibold text-foreground">
+                <h2 id="edit-task-title" className="text-lg sm:text-xl font-semibold text-foreground">
                   Edit Task
                 </h2>
                 <button
@@ -169,15 +169,15 @@ export const EditTaskDialog = memo(function EditTaskDialog({
                   value={desc}
                   onChange={(e) => setDesc(e.target.value)}
                   placeholder="Add a description..."
-                  className="input-modern min-h-[100px] resize-none"
+                  className="input-modern min-h-[80px] sm:min-h-[100px] resize-none"
                 />
               </div>
 
-              {/* Due Date, Time & Priority */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {/* Due Date & Time */}
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
                 <div>
-                  <label htmlFor="edit-due-date" className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-2">
-                    <Calendar className="w-4 h-4" />
+                  <label htmlFor="edit-due-date" className="flex items-center gap-2 text-xs sm:text-sm font-medium text-muted-foreground mb-2">
+                    <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     Due Date
                   </label>
                   <input
@@ -185,12 +185,12 @@ export const EditTaskDialog = memo(function EditTaskDialog({
                     type="date"
                     value={dueDate}
                     onChange={(e) => setDueDate(e.target.value)}
-                    className="input-modern"
+                    className="input-modern text-sm"
                   />
                 </div>
                 <div>
-                  <label htmlFor="edit-due-time" className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-2">
-                    <Clock className="w-4 h-4" />
+                  <label htmlFor="edit-due-time" className="flex items-center gap-2 text-xs sm:text-sm font-medium text-muted-foreground mb-2">
+                    <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     Due Time
                   </label>
                   <input
@@ -198,52 +198,54 @@ export const EditTaskDialog = memo(function EditTaskDialog({
                     type="time"
                     value={dueTime}
                     onChange={(e) => setDueTime(e.target.value)}
-                    className="input-modern"
+                    className="input-modern text-sm"
                     disabled={!dueDate}
                   />
                 </div>
-                <div>
-                  <label className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-2">
-                    <Flag className="w-4 h-4" />
-                    Priority
-                  </label>
-                  <div className="flex gap-2">
-                    {priorityOptions.map((p) => (
-                      <button
-                        key={p}
-                        type="button"
-                        onClick={() => setPriority(p)}
-                        className={cn(
-                          'flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all',
-                          priority === p
-                            ? p === 'High'
-                              ? 'bg-destructive/10 text-destructive ring-2 ring-destructive/30'
-                              : p === 'Medium'
-                              ? 'bg-warning/10 text-warning ring-2 ring-warning/30'
-                              : 'bg-muted text-muted-foreground ring-2 ring-muted-foreground/30'
-                            : 'bg-muted/50 text-muted-foreground hover:bg-muted'
-                        )}
-                        aria-pressed={priority === p}
-                      >
-                        {p}
-                      </button>
-                    ))}
-                  </div>
+              </div>
+
+              {/* Priority */}
+              <div>
+                <label className="flex items-center gap-2 text-xs sm:text-sm font-medium text-muted-foreground mb-2">
+                  <Flag className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  Priority
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {priorityOptions.map((p) => (
+                    <button
+                      key={p}
+                      type="button"
+                      onClick={() => setPriority(p)}
+                      className={cn(
+                        'px-2 sm:px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all',
+                        priority === p
+                          ? p === 'High'
+                            ? 'bg-destructive/10 text-destructive ring-2 ring-destructive/30'
+                            : p === 'Medium'
+                            ? 'bg-warning/10 text-warning ring-2 ring-warning/30'
+                            : 'bg-muted text-muted-foreground ring-2 ring-muted-foreground/30'
+                          : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+                      )}
+                      aria-pressed={priority === p}
+                    >
+                      {p}
+                    </button>
+                  ))}
                 </div>
               </div>
 
               {/* Actions */}
-              <div className="flex justify-end gap-3 pt-4 border-t border-border">
+              <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-4 border-t border-border">
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="btn-primary"
+                  className="btn-primary w-full sm:w-auto"
                 >
                   <Save className="w-4 h-4 mr-2" />
                   Save Changes
