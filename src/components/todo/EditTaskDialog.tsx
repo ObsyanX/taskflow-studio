@@ -1,6 +1,6 @@
 import React, { useState, useEffect, memo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Calendar, Flag, Save } from 'lucide-react';
+import { X, Calendar, Flag, Save, Clock } from 'lucide-react';
 import { Task, Priority } from '@/types/task';
 import { cn } from '@/lib/utils';
 
@@ -21,7 +21,8 @@ export const EditTaskDialog = memo(function EditTaskDialog({
 }: EditTaskDialogProps) {
   const [title, setTitle] = useState('');
   const [desc, setDesc] = useState('');
-  const [due, setDue] = useState('');
+  const [dueDate, setDueDate] = useState('');
+  const [dueTime, setDueTime] = useState('');
   const [priority, setPriority] = useState<Priority>('Medium');
   const [error, setError] = useState('');
 
@@ -29,7 +30,21 @@ export const EditTaskDialog = memo(function EditTaskDialog({
     if (task) {
       setTitle(task.title);
       setDesc(task.desc);
-      setDue(task.due || '');
+      // Parse existing due datetime
+      if (task.due) {
+        const date = new Date(task.due);
+        setDueDate(date.toISOString().split('T')[0]);
+        const hours = date.getHours();
+        const minutes = date.getMinutes();
+        if (hours !== 0 || minutes !== 0) {
+          setDueTime(`${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`);
+        } else {
+          setDueTime('');
+        }
+      } else {
+        setDueDate('');
+        setDueTime('');
+      }
       setPriority(task.priority);
       setError('');
     }
@@ -43,17 +58,23 @@ export const EditTaskDialog = memo(function EditTaskDialog({
       return;
     }
 
+    // Combine date and time into ISO string
+    let dueDateTime: string | null = null;
+    if (dueDate) {
+      dueDateTime = dueTime ? `${dueDate}T${dueTime}:00` : `${dueDate}T00:00:00`;
+    }
+
     if (task) {
       onSave(task.id, {
         title: title.trim(),
         desc: desc.trim(),
-        due: due || null,
+        due: dueDateTime,
         priority,
       });
     }
 
     onClose();
-  }, [title, desc, due, priority, task, onSave, onClose]);
+  }, [title, desc, dueDate, dueTime, priority, task, onSave, onClose]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Escape') {
@@ -152,19 +173,33 @@ export const EditTaskDialog = memo(function EditTaskDialog({
                 />
               </div>
 
-              {/* Due Date & Priority */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Due Date, Time & Priority */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <label htmlFor="edit-due" className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-2">
+                  <label htmlFor="edit-due-date" className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-2">
                     <Calendar className="w-4 h-4" />
                     Due Date
                   </label>
                   <input
-                    id="edit-due"
+                    id="edit-due-date"
                     type="date"
-                    value={due}
-                    onChange={(e) => setDue(e.target.value)}
+                    value={dueDate}
+                    onChange={(e) => setDueDate(e.target.value)}
                     className="input-modern"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="edit-due-time" className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-2">
+                    <Clock className="w-4 h-4" />
+                    Due Time
+                  </label>
+                  <input
+                    id="edit-due-time"
+                    type="time"
+                    value={dueTime}
+                    onChange={(e) => setDueTime(e.target.value)}
+                    className="input-modern"
+                    disabled={!dueDate}
                   />
                 </div>
                 <div>
