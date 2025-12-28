@@ -1,9 +1,11 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { List, Calendar } from 'lucide-react';
 import { Header } from '@/components/todo/Header';
 import { TaskForm } from '@/components/todo/TaskForm';
 import { FilterBar } from '@/components/todo/FilterBar';
 import { TaskList } from '@/components/todo/TaskList';
+import { CalendarView } from '@/components/todo/CalendarView';
 import { EditTaskDialog } from '@/components/todo/EditTaskDialog';
 import { UndoToast } from '@/components/todo/UndoToast';
 import { DeleteConfirmDialog } from '@/components/todo/DeleteConfirmDialog';
@@ -14,11 +16,16 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useNotifications } from '@/hooks/useNotifications';
 import { Task, FilterType, SortType, Priority, ReminderTime } from '@/types/task';
+import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
+
+type ViewMode = 'list' | 'calendar';
 
 const Index = () => {
   const { theme, toggleTheme } = useTheme();
   
   // UI State
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [filter, setFilter] = useState<FilterType>('all');
   const [sortBy, setSortBy] = useState<SortType>('date');
   const [searchQuery, setSearchQuery] = useState('');
@@ -26,6 +33,7 @@ const Index = () => {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [deletedTask, setDeletedTask] = useState<Task | null>(null);
   const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
+  const [preselectedDate, setPreselectedDate] = useState<string | null>(null);
 
   // Refs
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -64,7 +72,13 @@ const Index = () => {
     reminder: ReminderTime
   ) => {
     addTask(title, desc, due, priority, reminder);
+    setPreselectedDate(null);
   }, [addTask]);
+
+  const handleAddTaskFromCalendar = useCallback((date: Date) => {
+    setPreselectedDate(format(date, 'yyyy-MM-dd'));
+    setIsFormExpanded(true);
+  }, []);
 
   const handleRequestDelete = useCallback((id: string) => {
     const task = tasks.find(t => t.id === id);
@@ -113,6 +127,13 @@ const Index = () => {
     setEditingTask(null);
   }, []);
 
+  const handleToggleForm = useCallback(() => {
+    setIsFormExpanded(prev => !prev);
+    if (isFormExpanded) {
+      setPreselectedDate(null);
+    }
+  }, [isFormExpanded]);
+
   // Keyboard shortcuts
   useKeyboardShortcuts({
     onNewTask: () => setIsFormExpanded(true),
@@ -125,6 +146,7 @@ const Index = () => {
         setEditingTask(null);
       } else if (isFormExpanded) {
         setIsFormExpanded(false);
+        setPreselectedDate(null);
       }
     },
   });
@@ -154,30 +176,71 @@ const Index = () => {
           stats={stats}
         />
 
+        {/* View Toggle */}
+        <div className="flex items-center justify-center gap-2 mb-6">
+          <div className="inline-flex items-center rounded-xl bg-muted p-1">
+            <button
+              onClick={() => setViewMode('list')}
+              className={cn(
+                'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all',
+                viewMode === 'list'
+                  ? 'bg-card text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              <List className="w-4 h-4" />
+              <span className="hidden sm:inline">List</span>
+            </button>
+            <button
+              onClick={() => setViewMode('calendar')}
+              className={cn(
+                'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all',
+                viewMode === 'calendar'
+                  ? 'bg-card text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              <Calendar className="w-4 h-4" />
+              <span className="hidden sm:inline">Calendar</span>
+            </button>
+          </div>
+        </div>
+
         <TaskForm
           onSubmit={handleAddTask}
           isExpanded={isFormExpanded}
-          onToggleExpand={() => setIsFormExpanded(!isFormExpanded)}
+          onToggleExpand={handleToggleForm}
+          preselectedDate={preselectedDate}
         />
 
-        <FilterBar
-          filter={filter}
-          onFilterChange={setFilter}
-          sortBy={sortBy}
-          onSortChange={setSortBy}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          searchInputRef={searchInputRef}
-          stats={stats}
-        />
+        {viewMode === 'list' ? (
+          <>
+            <FilterBar
+              filter={filter}
+              onFilterChange={setFilter}
+              sortBy={sortBy}
+              onSortChange={setSortBy}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              searchInputRef={searchInputRef}
+              stats={stats}
+            />
 
-        <TaskList
-          tasks={filteredTasks}
-          loading={loading}
-          onToggle={toggleTask}
-          onEdit={handleEditTask}
-          onDelete={handleRequestDelete}
-        />
+            <TaskList
+              tasks={filteredTasks}
+              loading={loading}
+              onToggle={toggleTask}
+              onEdit={handleEditTask}
+              onDelete={handleRequestDelete}
+            />
+          </>
+        ) : (
+          <CalendarView
+            tasks={tasks}
+            onTaskClick={handleEditTask}
+            onAddTask={handleAddTaskFromCalendar}
+          />
+        )}
 
         <footer className="mt-12 pt-6 border-t border-border text-center">
           <p className="text-sm text-muted-foreground">

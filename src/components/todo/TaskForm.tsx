@@ -9,6 +9,7 @@ interface TaskFormProps {
   onSubmit: (title: string, desc: string, due: string | null, priority: Priority, reminder: ReminderTime) => void;
   isExpanded: boolean;
   onToggleExpand: () => void;
+  preselectedDate?: string | null;
 }
 
 const priorityOptions: Priority[] = ['High', 'Medium', 'Low'];
@@ -18,6 +19,7 @@ export const TaskForm = memo(function TaskForm({
   onSubmit,
   isExpanded,
   onToggleExpand,
+  preselectedDate,
 }: TaskFormProps) {
   const [title, setTitle] = useState('');
   const [desc, setDesc] = useState('');
@@ -33,7 +35,11 @@ export const TaskForm = memo(function TaskForm({
     if (isExpanded && inputRef.current) {
       inputRef.current.focus();
     }
-  }, [isExpanded]);
+    // Set preselected date when form expands
+    if (isExpanded && preselectedDate) {
+      setDueDate(preselectedDate);
+    }
+  }, [isExpanded, preselectedDate]);
 
   const handleSubmit = useCallback((e?: React.FormEvent) => {
     e?.preventDefault();
