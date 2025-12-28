@@ -1,8 +1,8 @@
 import React, { memo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Sparkles, Plus, Keyboard, CheckCircle2 } from 'lucide-react';
+import { Sparkles, Plus, Keyboard, CheckCircle2, Hand } from 'lucide-react';
 import { Task } from '@/types/task';
-import { TaskCard } from './TaskCard';
+import { SwipeableTaskCard } from './SwipeableTaskCard';
 
 interface TaskListProps {
   tasks: Task[];
@@ -88,7 +88,17 @@ export const TaskList = memo(function TaskList({
             </div>
             <div>
               <p className="text-sm font-medium text-foreground">Stay organized</p>
-              <p className="text-xs text-muted-foreground">Set priorities and due dates to track progress</p>
+              <p className="text-xs text-muted-foreground">Set priorities, due dates and reminders</p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3 p-4 rounded-xl bg-muted/50 border border-border/50">
+            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <Hand className="w-4 h-4 text-primary" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-foreground">Swipe gestures</p>
+              <p className="text-xs text-muted-foreground">Swipe right to complete, left to delete</p>
             </div>
           </div>
 
@@ -110,7 +120,7 @@ export const TaskList = memo(function TaskList({
     <div className="space-y-3">
       <AnimatePresence mode="popLayout">
         {tasks.map((task, index) => (
-          <TaskCard
+          <SwipeableTaskCard
             key={task.id}
             task={task}
             onToggle={onToggle}
