@@ -1,16 +1,18 @@
 import React, { useState, useRef, useEffect, memo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, X, Calendar, Flag, Clock } from 'lucide-react';
-import { Priority } from '@/types/task';
+import { Plus, X, Calendar, Flag, Clock, Bell } from 'lucide-react';
+import { Priority, ReminderTime } from '@/types/task';
+import { getReminderLabel } from '@/hooks/useNotifications';
 import { cn } from '@/lib/utils';
 
 interface TaskFormProps {
-  onSubmit: (title: string, desc: string, due: string | null, priority: Priority) => void;
+  onSubmit: (title: string, desc: string, due: string | null, priority: Priority, reminder: ReminderTime) => void;
   isExpanded: boolean;
   onToggleExpand: () => void;
 }
 
 const priorityOptions: Priority[] = ['High', 'Medium', 'Low'];
+const reminderOptions: ReminderTime[] = ['none', '5min', '15min', '30min', '1hour', '1day'];
 
 export const TaskForm = memo(function TaskForm({
   onSubmit,
@@ -22,6 +24,7 @@ export const TaskForm = memo(function TaskForm({
   const [dueDate, setDueDate] = useState('');
   const [dueTime, setDueTime] = useState('');
   const [priority, setPriority] = useState<Priority>('Medium');
+  const [reminder, setReminder] = useState<ReminderTime>('none');
   const [error, setError] = useState('');
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -46,7 +49,7 @@ export const TaskForm = memo(function TaskForm({
       dueDateTime = dueTime ? `${dueDate}T${dueTime}:00` : `${dueDate}T00:00:00`;
     }
 
-    onSubmit(title, desc, dueDateTime, priority);
+    onSubmit(title, desc, dueDateTime, priority, reminder);
     
     // Reset form
     setTitle('');
@@ -54,9 +57,10 @@ export const TaskForm = memo(function TaskForm({
     setDueDate('');
     setDueTime('');
     setPriority('Medium');
+    setReminder('none');
     setError('');
     onToggleExpand();
-  }, [title, desc, dueDate, dueTime, priority, onSubmit, onToggleExpand]);
+  }, [title, desc, dueDate, dueTime, priority, reminder, onSubmit, onToggleExpand]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey && title.trim()) {
@@ -199,6 +203,34 @@ export const TaskForm = memo(function TaskForm({
                       </button>
                     ))}
                   </div>
+                </div>
+              </div>
+
+              {/* Reminder */}
+              <div>
+                <label className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                  <Bell className="w-4 h-4" />
+                  Reminder
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {reminderOptions.map((r) => (
+                    <button
+                      key={r}
+                      type="button"
+                      onClick={() => setReminder(r)}
+                      disabled={!dueDate}
+                      className={cn(
+                        'px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all',
+                        !dueDate && 'opacity-50 cursor-not-allowed',
+                        reminder === r
+                          ? 'bg-primary/10 text-primary ring-2 ring-primary/30'
+                          : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+                      )}
+                      aria-pressed={reminder === r}
+                    >
+                      {getReminderLabel(r)}
+                    </button>
+                  ))}
                 </div>
               </div>
 

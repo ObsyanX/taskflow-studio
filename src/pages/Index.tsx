@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Header } from '@/components/todo/Header';
 import { TaskForm } from '@/components/todo/TaskForm';
@@ -6,12 +6,14 @@ import { FilterBar } from '@/components/todo/FilterBar';
 import { TaskList } from '@/components/todo/TaskList';
 import { EditTaskDialog } from '@/components/todo/EditTaskDialog';
 import { UndoToast } from '@/components/todo/UndoToast';
+import { DeleteConfirmDialog } from '@/components/todo/DeleteConfirmDialog';
 import { Spotlight } from '@/components/todo/Spotlight';
 import { useTasks } from '@/hooks/useTasks';
 import { useTheme } from '@/hooks/useTheme';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
-import { Task, FilterType, SortType, Priority } from '@/types/task';
+import { useNotifications } from '@/hooks/useNotifications';
+import { Task, FilterType, SortType, Priority, ReminderTime } from '@/types/task';
 
 const Index = () => {
   const { theme, toggleTheme } = useTheme();
@@ -23,6 +25,7 @@ const Index = () => {
   const [isFormExpanded, setIsFormExpanded] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [deletedTask, setDeletedTask] = useState<Task | null>(null);
+  const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
 
   // Refs
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -32,6 +35,7 @@ const Index = () => {
 
   // Tasks
   const {
+    tasks,
     filteredTasks,
     loading,
     addTask,
@@ -39,25 +43,49 @@ const Index = () => {
     deleteTask,
     toggleTask,
     restoreTask,
+    markReminderFired,
     stats,
   } = useTasks(filter, sortBy, debouncedSearch);
+
+  // Notifications
+  const { requestPermission } = useNotifications(tasks, markReminderFired);
+
+  // Request notification permission on mount
+  useEffect(() => {
+    requestPermission();
+  }, [requestPermission]);
 
   // Handlers
   const handleAddTask = useCallback((
     title: string,
     desc: string,
     due: string | null,
-    priority: Priority
+    priority: Priority,
+    reminder: ReminderTime
   ) => {
-    addTask(title, desc, due, priority);
+    addTask(title, desc, due, priority, reminder);
   }, [addTask]);
 
-  const handleDeleteTask = useCallback((id: string) => {
-    const task = deleteTask(id);
+  const handleRequestDelete = useCallback((id: string) => {
+    const task = tasks.find(t => t.id === id);
     if (task) {
-      setDeletedTask(task);
+      setTaskToDelete(task);
     }
-  }, [deleteTask]);
+  }, [tasks]);
+
+  const handleConfirmDelete = useCallback(() => {
+    if (taskToDelete) {
+      const task = deleteTask(taskToDelete.id);
+      if (task) {
+        setDeletedTask(task);
+      }
+      setTaskToDelete(null);
+    }
+  }, [taskToDelete, deleteTask]);
+
+  const handleCancelDelete = useCallback(() => {
+    setTaskToDelete(null);
+  }, []);
 
   const handleUndo = useCallback(() => {
     if (deletedTask) {
@@ -91,7 +119,9 @@ const Index = () => {
     onFocusSearch: () => searchInputRef.current?.focus(),
     onToggleTheme: toggleTheme,
     onEscape: () => {
-      if (editingTask) {
+      if (taskToDelete) {
+        setTaskToDelete(null);
+      } else if (editingTask) {
         setEditingTask(null);
       } else if (isFormExpanded) {
         setIsFormExpanded(false);
@@ -101,10 +131,8 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background theme-transition">
-      {/* Spotlight effect */}
       <Spotlight enabled={true} />
 
-      {/* Background pattern */}
       <div 
         className="fixed inset-0 pointer-events-none opacity-[0.02] dark:opacity-[0.03]"
         style={{
@@ -114,7 +142,6 @@ const Index = () => {
         aria-hidden="true"
       />
 
-      {/* Main Content */}
       <motion.main
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -149,10 +176,9 @@ const Index = () => {
           loading={loading}
           onToggle={toggleTask}
           onEdit={handleEditTask}
-          onDelete={handleDeleteTask}
+          onDelete={handleRequestDelete}
         />
 
-        {/* Footer */}
         <footer className="mt-12 pt-6 border-t border-border text-center">
           <p className="text-sm text-muted-foreground">
             Press <kbd className="px-1.5 py-0.5 rounded bg-muted font-mono text-xs">N</kbd> for new task, <kbd className="px-1.5 py-0.5 rounded bg-muted font-mono text-xs">/</kbd> to search
@@ -160,7 +186,6 @@ const Index = () => {
         </footer>
       </motion.main>
 
-      {/* Edit Dialog */}
       <EditTaskDialog
         task={editingTask}
         isOpen={!!editingTask}
@@ -168,7 +193,13 @@ const Index = () => {
         onSave={handleSaveEdit}
       />
 
-      {/* Undo Toast */}
+      <DeleteConfirmDialog
+        isOpen={!!taskToDelete}
+        taskTitle={taskToDelete?.title || ''}
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+      />
+
       <UndoToast
         deletedTask={deletedTask}
         onUndo={handleUndo}

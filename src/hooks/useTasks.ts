@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react';
-import { Task, FilterType, SortType, Priority } from '@/types/task';
+import { Task, FilterType, SortType, Priority, ReminderTime } from '@/types/task';
 import { useLocalStorage } from './useLocalStorage';
 import { filterTasks, sortTasks } from '@/utils/helpers';
 import { v4 as uuidv4 } from 'uuid';
@@ -8,12 +8,13 @@ interface UseTasksReturn {
   tasks: Task[];
   filteredTasks: Task[];
   loading: boolean;
-  addTask: (title: string, desc?: string, due?: string | null, priority?: Priority) => Task;
+  addTask: (title: string, desc?: string, due?: string | null, priority?: Priority, reminder?: ReminderTime) => Task;
   updateTask: (id: string, updates: Partial<Omit<Task, 'id' | 'createdAt'>>) => void;
   deleteTask: (id: string) => Task | undefined;
   toggleTask: (id: string) => void;
   restoreTask: (task: Task) => void;
   clearCompleted: () => void;
+  markReminderFired: (id: string) => void;
   stats: {
     total: number;
     active: number;
@@ -32,7 +33,8 @@ export function useTasks(
     title: string,
     desc: string = '',
     due: string | null = null,
-    priority: Priority = 'Medium'
+    priority: Priority = 'Medium',
+    reminder: ReminderTime = 'none'
   ): Task => {
     const newTask: Task = {
       id: uuidv4(),
@@ -42,6 +44,8 @@ export function useTasks(
       priority,
       done: false,
       createdAt: new Date().toISOString(),
+      reminder,
+      reminderFired: false,
     };
 
     setTasks(prev => [newTask, ...prev]);
@@ -93,6 +97,14 @@ export function useTasks(
     setTasks(prev => prev.filter(task => !task.done));
   }, [setTasks]);
 
+  const markReminderFired = useCallback((id: string) => {
+    setTasks(prev =>
+      prev.map(task =>
+        task.id === id ? { ...task, reminderFired: true } : task
+      )
+    );
+  }, [setTasks]);
+
   const filteredTasks = useMemo(() => {
     const filtered = filterTasks(tasks, filter, searchQuery);
     return sortTasks(filtered, sortBy);
@@ -114,6 +126,7 @@ export function useTasks(
     toggleTask,
     restoreTask,
     clearCompleted,
+    markReminderFired,
     stats,
   };
 }
