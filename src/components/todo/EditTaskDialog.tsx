@@ -1,7 +1,8 @@
 import React, { useState, useEffect, memo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Calendar, Flag, Save, Clock } from 'lucide-react';
-import { Task, Priority } from '@/types/task';
+import { X, Calendar, Flag, Save, Clock, Bell } from 'lucide-react';
+import { Task, Priority, ReminderTime } from '@/types/task';
+import { getReminderLabel } from '@/hooks/useNotifications';
 import { cn } from '@/lib/utils';
 
 interface EditTaskDialogProps {
@@ -12,6 +13,7 @@ interface EditTaskDialogProps {
 }
 
 const priorityOptions: Priority[] = ['High', 'Medium', 'Low'];
+const reminderOptions: ReminderTime[] = ['none', '5min', '15min', '30min', '1hour', '1day'];
 
 export const EditTaskDialog = memo(function EditTaskDialog({
   task,
@@ -24,6 +26,7 @@ export const EditTaskDialog = memo(function EditTaskDialog({
   const [dueDate, setDueDate] = useState('');
   const [dueTime, setDueTime] = useState('');
   const [priority, setPriority] = useState<Priority>('Medium');
+  const [reminder, setReminder] = useState<ReminderTime>('none');
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -46,6 +49,7 @@ export const EditTaskDialog = memo(function EditTaskDialog({
         setDueTime('');
       }
       setPriority(task.priority);
+      setReminder(task.reminder || 'none');
       setError('');
     }
   }, [task]);
@@ -70,11 +74,13 @@ export const EditTaskDialog = memo(function EditTaskDialog({
         desc: desc.trim(),
         due: dueDateTime,
         priority,
+        reminder,
+        reminderFired: false, // Reset reminder when editing
       });
     }
 
     onClose();
-  }, [title, desc, dueDate, dueTime, priority, task, onSave, onClose]);
+  }, [title, desc, dueDate, dueTime, priority, reminder, task, onSave, onClose]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Escape') {
@@ -229,6 +235,34 @@ export const EditTaskDialog = memo(function EditTaskDialog({
                       aria-pressed={priority === p}
                     >
                       {p}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Reminder */}
+              <div>
+                <label className="flex items-center gap-2 text-xs sm:text-sm font-medium text-muted-foreground mb-2">
+                  <Bell className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  Reminder
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {reminderOptions.map((r) => (
+                    <button
+                      key={r}
+                      type="button"
+                      onClick={() => setReminder(r)}
+                      disabled={!dueDate}
+                      className={cn(
+                        'px-2 sm:px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all',
+                        !dueDate && 'opacity-50 cursor-not-allowed',
+                        reminder === r
+                          ? 'bg-primary/10 text-primary ring-2 ring-primary/30'
+                          : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+                      )}
+                      aria-pressed={reminder === r}
+                    >
+                      {getReminderLabel(r)}
                     </button>
                   ))}
                 </div>

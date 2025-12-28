@@ -8,7 +8,8 @@ export const sampleTasks: Task[] = [
     due: "2025-12-10",
     priority: "High",
     done: false,
-    createdAt: "2025-12-01T10:00:00Z"
+    createdAt: "2025-12-01T10:00:00Z",
+    reminder: "15min"
   },
   {
     id: "t-2",
@@ -17,7 +18,8 @@ export const sampleTasks: Task[] = [
     due: "2025-12-02",
     priority: "Medium",
     done: true,
-    createdAt: "2025-12-01T09:00:00Z"
+    createdAt: "2025-12-01T09:00:00Z",
+    reminder: "none"
   },
   {
     id: "t-3",
@@ -26,7 +28,8 @@ export const sampleTasks: Task[] = [
     due: null,
     priority: "Low",
     done: false,
-    createdAt: "2025-12-01T08:00:00Z"
+    createdAt: "2025-12-01T08:00:00Z",
+    reminder: "none"
   },
   {
     id: "t-4",
@@ -35,7 +38,8 @@ export const sampleTasks: Task[] = [
     due: null,
     priority: "Low",
     done: false,
-    createdAt: "2025-12-01T07:00:00Z"
+    createdAt: "2025-12-01T07:00:00Z",
+    reminder: "none"
   },
   {
     id: "t-5",
@@ -44,7 +48,8 @@ export const sampleTasks: Task[] = [
     due: "2025-12-05",
     priority: "Medium",
     done: false,
-    createdAt: "2025-12-01T06:00:00Z"
+    createdAt: "2025-12-01T06:00:00Z",
+    reminder: "1hour"
   },
   {
     id: "t-6",
@@ -53,6 +58,7 @@ export const sampleTasks: Task[] = [
     due: "2025-12-07",
     priority: "High",
     done: false,
-    createdAt: "2025-12-01T05:00:00Z"
+    createdAt: "2025-12-01T05:00:00Z",
+    reminder: "30min"
   }
 ];
