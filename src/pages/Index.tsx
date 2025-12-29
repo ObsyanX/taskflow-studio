@@ -1,11 +1,12 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { List, Calendar } from 'lucide-react';
+import { List, Calendar, CalendarDays } from 'lucide-react';
 import { Header } from '@/components/todo/Header';
 import { TaskForm } from '@/components/todo/TaskForm';
 import { FilterBar } from '@/components/todo/FilterBar';
 import { TaskList } from '@/components/todo/TaskList';
 import { CalendarView } from '@/components/todo/CalendarView';
+import { WeeklyAgendaView } from '@/components/todo/WeeklyAgendaView';
 import { EditTaskDialog } from '@/components/todo/EditTaskDialog';
 import { UndoToast } from '@/components/todo/UndoToast';
 import { DeleteConfirmDialog } from '@/components/todo/DeleteConfirmDialog';
@@ -15,11 +16,11 @@ import { useTheme } from '@/hooks/useTheme';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useNotifications } from '@/hooks/useNotifications';
-import { Task, FilterType, SortType, Priority, ReminderTime } from '@/types/task';
+import { Task, FilterType, SortType, Priority, ReminderTime, RecurrenceType } from '@/types/task';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 
-type ViewMode = 'list' | 'calendar';
+type ViewMode = 'list' | 'calendar' | 'weekly';
 
 const Index = () => {
   const { theme, toggleTheme } = useTheme();
@@ -69,9 +70,11 @@ const Index = () => {
     desc: string,
     due: string | null,
     priority: Priority,
-    reminder: ReminderTime
+    reminder: ReminderTime,
+    categoryId?: string,
+    recurrence?: RecurrenceType
   ) => {
-    addTask(title, desc, due, priority, reminder);
+    addTask(title, desc, due, priority, reminder, categoryId, recurrence);
     setPreselectedDate(null);
   }, [addTask]);
 
@@ -182,7 +185,7 @@ const Index = () => {
             <button
               onClick={() => setViewMode('list')}
               className={cn(
-                'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all',
+                'flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all',
                 viewMode === 'list'
                   ? 'bg-card text-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
@@ -192,16 +195,28 @@ const Index = () => {
               <span className="hidden sm:inline">List</span>
             </button>
             <button
+              onClick={() => setViewMode('weekly')}
+              className={cn(
+                'flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all',
+                viewMode === 'weekly'
+                  ? 'bg-card text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              <CalendarDays className="w-4 h-4" />
+              <span className="hidden sm:inline">Week</span>
+            </button>
+            <button
               onClick={() => setViewMode('calendar')}
               className={cn(
-                'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all',
+                'flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all',
                 viewMode === 'calendar'
                   ? 'bg-card text-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
               )}
             >
               <Calendar className="w-4 h-4" />
-              <span className="hidden sm:inline">Calendar</span>
+              <span className="hidden sm:inline">Month</span>
             </button>
           </div>
         </div>
@@ -234,6 +249,12 @@ const Index = () => {
               onDelete={handleRequestDelete}
             />
           </>
+        ) : viewMode === 'weekly' ? (
+          <WeeklyAgendaView
+            tasks={tasks}
+            onTaskClick={handleEditTask}
+            onAddTask={handleAddTaskFromCalendar}
+          />
         ) : (
           <CalendarView
             tasks={tasks}

@@ -1,12 +1,14 @@
 import React, { useState, useRef, useEffect, memo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, X, Calendar, Flag, Clock, Bell } from 'lucide-react';
-import { Priority, ReminderTime } from '@/types/task';
+import { Priority, ReminderTime, RecurrenceType } from '@/types/task';
 import { getReminderLabel } from '@/hooks/useNotifications';
+import { CategorySelector } from './CategorySelector';
+import { RecurrenceSelector } from './RecurrenceSelector';
 import { cn } from '@/lib/utils';
 
 interface TaskFormProps {
-  onSubmit: (title: string, desc: string, due: string | null, priority: Priority, reminder: ReminderTime) => void;
+  onSubmit: (title: string, desc: string, due: string | null, priority: Priority, reminder: ReminderTime, categoryId?: string, recurrence?: RecurrenceType) => void;
   isExpanded: boolean;
   onToggleExpand: () => void;
   preselectedDate?: string | null;
@@ -27,6 +29,8 @@ export const TaskForm = memo(function TaskForm({
   const [dueTime, setDueTime] = useState('');
   const [priority, setPriority] = useState<Priority>('Medium');
   const [reminder, setReminder] = useState<ReminderTime>('none');
+  const [categoryId, setCategoryId] = useState<string | undefined>(undefined);
+  const [recurrence, setRecurrence] = useState<RecurrenceType>('none');
   const [error, setError] = useState('');
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -55,7 +59,7 @@ export const TaskForm = memo(function TaskForm({
       dueDateTime = dueTime ? `${dueDate}T${dueTime}:00` : `${dueDate}T00:00:00`;
     }
 
-    onSubmit(title, desc, dueDateTime, priority, reminder);
+    onSubmit(title, desc, dueDateTime, priority, reminder, categoryId, recurrence);
     
     // Reset form
     setTitle('');
@@ -64,9 +68,11 @@ export const TaskForm = memo(function TaskForm({
     setDueTime('');
     setPriority('Medium');
     setReminder('none');
+    setCategoryId(undefined);
+    setRecurrence('none');
     setError('');
     onToggleExpand();
-  }, [title, desc, dueDate, dueTime, priority, reminder, onSubmit, onToggleExpand]);
+  }, [title, desc, dueDate, dueTime, priority, reminder, categoryId, recurrence, onSubmit, onToggleExpand]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey && title.trim()) {
@@ -212,6 +218,12 @@ export const TaskForm = memo(function TaskForm({
                 </div>
               </div>
 
+              {/* Category */}
+              <CategorySelector
+                selectedCategoryId={categoryId}
+                onSelect={setCategoryId}
+              />
+
               {/* Reminder */}
               <div>
                 <label className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
@@ -239,6 +251,13 @@ export const TaskForm = memo(function TaskForm({
                   ))}
                 </div>
               </div>
+
+              {/* Recurrence */}
+              <RecurrenceSelector
+                value={recurrence}
+                onChange={setRecurrence}
+                disabled={!dueDate}
+              />
 
               {/* Actions */}
               <div className="flex justify-end gap-2 pt-2 border-t border-border">

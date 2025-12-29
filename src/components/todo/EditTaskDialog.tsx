@@ -1,8 +1,10 @@
 import React, { useState, useEffect, memo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Calendar, Flag, Save, Clock, Bell } from 'lucide-react';
-import { Task, Priority, ReminderTime } from '@/types/task';
+import { Task, Priority, ReminderTime, RecurrenceType } from '@/types/task';
 import { getReminderLabel } from '@/hooks/useNotifications';
+import { CategorySelector } from './CategorySelector';
+import { RecurrenceSelector } from './RecurrenceSelector';
 import { cn } from '@/lib/utils';
 
 interface EditTaskDialogProps {
@@ -27,6 +29,8 @@ export const EditTaskDialog = memo(function EditTaskDialog({
   const [dueTime, setDueTime] = useState('');
   const [priority, setPriority] = useState<Priority>('Medium');
   const [reminder, setReminder] = useState<ReminderTime>('none');
+  const [categoryId, setCategoryId] = useState<string | undefined>(undefined);
+  const [recurrence, setRecurrence] = useState<RecurrenceType>('none');
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -50,6 +54,8 @@ export const EditTaskDialog = memo(function EditTaskDialog({
       }
       setPriority(task.priority);
       setReminder(task.reminder || 'none');
+      setCategoryId(task.categoryId);
+      setRecurrence(task.recurrence || 'none');
       setError('');
     }
   }, [task]);
@@ -75,12 +81,14 @@ export const EditTaskDialog = memo(function EditTaskDialog({
         due: dueDateTime,
         priority,
         reminder,
-        reminderFired: false, // Reset reminder when editing
+        reminderFired: false,
+        categoryId,
+        recurrence,
       });
     }
 
     onClose();
-  }, [title, desc, dueDate, dueTime, priority, reminder, task, onSave, onClose]);
+  }, [title, desc, dueDate, dueTime, priority, reminder, categoryId, recurrence, task, onSave, onClose]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Escape') {
@@ -240,6 +248,12 @@ export const EditTaskDialog = memo(function EditTaskDialog({
                 </div>
               </div>
 
+              {/* Category */}
+              <CategorySelector
+                selectedCategoryId={categoryId}
+                onSelect={setCategoryId}
+              />
+
               {/* Reminder */}
               <div>
                 <label className="flex items-center gap-2 text-xs sm:text-sm font-medium text-muted-foreground mb-2">
@@ -267,6 +281,13 @@ export const EditTaskDialog = memo(function EditTaskDialog({
                   ))}
                 </div>
               </div>
+
+              {/* Recurrence */}
+              <RecurrenceSelector
+                value={recurrence}
+                onChange={setRecurrence}
+                disabled={!dueDate}
+              />
 
               {/* Actions */}
               <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-4 border-t border-border">
