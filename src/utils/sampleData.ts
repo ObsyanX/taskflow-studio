@@ -9,7 +9,9 @@ export const sampleTasks: Task[] = [
     priority: "High",
     done: false,
     createdAt: "2025-12-01T10:00:00Z",
-    reminder: "15min"
+    reminder: "15min",
+    recurrence: "none",
+    categoryId: "work"
   },
   {
     id: "t-2",
@@ -19,7 +21,9 @@ export const sampleTasks: Task[] = [
     priority: "Medium",
     done: true,
     createdAt: "2025-12-01T09:00:00Z",
-    reminder: "none"
+    reminder: "none",
+    recurrence: "none",
+    categoryId: "work"
   },
   {
     id: "t-3",
@@ -29,7 +33,8 @@ export const sampleTasks: Task[] = [
     priority: "Low",
     done: false,
     createdAt: "2025-12-01T08:00:00Z",
-    reminder: "none"
+    reminder: "none",
+    recurrence: "none"
   },
   {
     id: "t-4",
@@ -39,7 +44,9 @@ export const sampleTasks: Task[] = [
     priority: "Low",
     done: false,
     createdAt: "2025-12-01T07:00:00Z",
-    reminder: "none"
+    reminder: "none",
+    recurrence: "none",
+    categoryId: "personal"
   },
   {
     id: "t-5",
@@ -49,7 +56,9 @@ export const sampleTasks: Task[] = [
     priority: "Medium",
     done: false,
     createdAt: "2025-12-01T06:00:00Z",
-    reminder: "1hour"
+    reminder: "1hour",
+    recurrence: "none",
+    categoryId: "work"
   },
   {
     id: "t-6",
@@ -59,6 +68,8 @@ export const sampleTasks: Task[] = [
     priority: "High",
     done: false,
     createdAt: "2025-12-01T05:00:00Z",
-    reminder: "30min"
+    reminder: "30min",
+    recurrence: "weekly",
+    categoryId: "health"
   }
 ];

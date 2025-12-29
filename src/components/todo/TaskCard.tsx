@@ -1,9 +1,11 @@
 import React, { memo, useState, useRef, useCallback } from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
-import { Calendar, Edit2, Trash2, GripVertical, Check, RotateCcw } from 'lucide-react';
-import { Task } from '@/types/task';
+import { Calendar, Edit2, Trash2, GripVertical, Check, RotateCcw, Repeat } from 'lucide-react';
+import { Task, DEFAULT_CATEGORIES } from '@/types/task';
 import { AnimatedCheckbox } from './AnimatedCheckbox';
 import { PriorityChip } from './PriorityChip';
+import { CategoryBadge } from './CategoryBadge';
+import { getRecurrenceLabel } from './RecurrenceSelector';
 import { formatDueDate, isDueDatePast, triggerHaptic } from '@/utils/helpers';
 import { cn } from '@/lib/utils';
 
@@ -70,6 +72,9 @@ export const TaskCard = memo(function TaskCard({
 
   const dueDateFormatted = formatDueDate(task.due);
   const isOverdue = isDueDatePast(task.due) && !task.done;
+  const category = task.categoryId 
+    ? DEFAULT_CATEGORIES.find(c => c.id === task.categoryId)
+    : null;
 
   return (
     <motion.div
@@ -148,7 +153,10 @@ export const TaskCard = memo(function TaskCard({
           </div>
 
           {/* Meta info */}
-          <div className="mt-2 sm:mt-3 flex items-center gap-4">
+          <div className="mt-2 sm:mt-3 flex flex-wrap items-center gap-2 sm:gap-4">
+            {category && (
+              <CategoryBadge category={category} size="sm" />
+            )}
             {task.due && (
               <div
                 className={cn(
@@ -158,6 +166,12 @@ export const TaskCard = memo(function TaskCard({
               >
                 <Calendar className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                 <span>{dueDateFormatted}</span>
+              </div>
+            )}
+            {task.recurrence && task.recurrence !== 'none' && (
+              <div className="flex items-center gap-1 text-[10px] sm:text-xs font-medium text-primary">
+                <Repeat className="h-3 w-3" />
+                <span className="hidden sm:inline">{getRecurrenceLabel(task.recurrence)}</span>
               </div>
             )}
           </div>
