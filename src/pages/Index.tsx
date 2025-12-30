@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { List, Calendar, CalendarDays } from 'lucide-react';
+import { List, Calendar, CalendarDays, BookOpen } from 'lucide-react';
 import { Header } from '@/components/todo/Header';
 import { TaskForm } from '@/components/todo/TaskForm';
 import { FilterBar } from '@/components/todo/FilterBar';
@@ -11,6 +11,7 @@ import { EditTaskDialog } from '@/components/todo/EditTaskDialog';
 import { UndoToast } from '@/components/todo/UndoToast';
 import { DeleteConfirmDialog } from '@/components/todo/DeleteConfirmDialog';
 import { Spotlight } from '@/components/todo/Spotlight';
+import { DiaryView } from '@/components/diary/DiaryView';
 import { useTasks } from '@/hooks/useTasks';
 import { useTheme } from '@/hooks/useTheme';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -20,7 +21,7 @@ import { Task, FilterType, SortType, Priority, ReminderTime, RecurrenceType } fr
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 
-type ViewMode = 'list' | 'calendar' | 'weekly';
+type ViewMode = 'list' | 'calendar' | 'weekly' | 'diary';
 
 const Index = () => {
   const { theme, toggleTheme } = useTheme();
@@ -218,6 +219,18 @@ const Index = () => {
               <Calendar className="w-4 h-4" />
               <span className="hidden sm:inline">Month</span>
             </button>
+            <button
+              onClick={() => setViewMode('diary')}
+              className={cn(
+                'flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all',
+                viewMode === 'diary'
+                  ? 'bg-card text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              <BookOpen className="w-4 h-4" />
+              <span className="hidden sm:inline">Diary</span>
+            </button>
           </div>
         </div>
 
@@ -228,8 +241,17 @@ const Index = () => {
           preselectedDate={preselectedDate}
         />
 
-        {viewMode === 'list' ? (
+        {viewMode === 'diary' ? (
+          <DiaryView />
+        ) : viewMode === 'list' ? (
           <>
+            <TaskForm
+              onSubmit={handleAddTask}
+              isExpanded={isFormExpanded}
+              onToggleExpand={handleToggleForm}
+              preselectedDate={preselectedDate}
+            />
+
             <FilterBar
               filter={filter}
               onFilterChange={setFilter}
@@ -250,17 +272,33 @@ const Index = () => {
             />
           </>
         ) : viewMode === 'weekly' ? (
-          <WeeklyAgendaView
-            tasks={tasks}
-            onTaskClick={handleEditTask}
-            onAddTask={handleAddTaskFromCalendar}
-          />
+          <>
+            <TaskForm
+              onSubmit={handleAddTask}
+              isExpanded={isFormExpanded}
+              onToggleExpand={handleToggleForm}
+              preselectedDate={preselectedDate}
+            />
+            <WeeklyAgendaView
+              tasks={tasks}
+              onTaskClick={handleEditTask}
+              onAddTask={handleAddTaskFromCalendar}
+            />
+          </>
         ) : (
-          <CalendarView
-            tasks={tasks}
-            onTaskClick={handleEditTask}
-            onAddTask={handleAddTaskFromCalendar}
-          />
+          <>
+            <TaskForm
+              onSubmit={handleAddTask}
+              isExpanded={isFormExpanded}
+              onToggleExpand={handleToggleForm}
+              preselectedDate={preselectedDate}
+            />
+            <CalendarView
+              tasks={tasks}
+              onTaskClick={handleEditTask}
+              onAddTask={handleAddTaskFromCalendar}
+            />
+          </>
         )}
 
         <footer className="mt-12 pt-6 border-t border-border text-center">
