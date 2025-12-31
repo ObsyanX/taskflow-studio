@@ -327,4 +327,45 @@
     transform: translateZ(0);
     backface-visibility: hidden;
   }
+
+  /* Diary Editor Styles */
+  .diary-editor {
+    /* Smooth caret */
+    caret-shape: bar;
+    
+    /* Focus styles */
+    &:focus {
+      outline: none;
+    }
+    
+    /* Selection styling */
+    &::selection,
+    & *::selection {
+      background-color: hsl(var(--primary) / 0.2);
+    }
+    
+    /* Prevent text selection highlight issues */
+    -webkit-user-select: text;
+    user-select: text;
+    
+    /* Smooth typing feel */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "kern" 1, "liga" 1;
+    
+    /* Word wrapping */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: pre-wrap;
+  }
+  
+  /* Diary caret animation */
+  .diary-editor:focus {
+    animation: diary-caret-blink 1s ease-in-out infinite;
+  }
+  
+  @keyframes diary-caret-blink {
+    0%, 100% { caret-color: hsl(var(--foreground) / 0.7); }
+    50% { caret-color: hsl(var(--foreground) / 0.3); }
+  }
 }

@@ -7,6 +7,8 @@ import { DiaryEntry, DiaryMood } from '@/types/diary';
 import { MoodSelector } from './MoodSelector';
 import { RibbonBookmark } from './RibbonBookmark';
 import { DiaryDateNav } from './DiaryDateNav';
+import { DiaryFontSelector, DiaryFont, DIARY_FONTS } from './DiaryFontSelector';
+import { DiaryEditor } from './DiaryEditor';
 
 interface DiaryPageProps {
   currentDate: string;
@@ -19,6 +21,10 @@ interface DiaryPageProps {
   onLock: () => void;
   onOpenSettings: () => void;
 }
+
+// Default to a beautiful handwriting font
+const DEFAULT_FONT = DIARY_FONTS.find(f => f.name === 'Dancing Script') || DIARY_FONTS[0];
+const FONT_STORAGE_KEY = 'diary-selected-font';
 
 export const DiaryPage = memo(function DiaryPage({
   currentDate,
@@ -35,7 +41,18 @@ export const DiaryPage = memo(function DiaryPage({
   const [mood, setMood] = useState<DiaryMood | undefined>(entry?.mood);
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [selectedFont, setSelectedFont] = useState<DiaryFont>(() => {
+    // Load saved font preference
+    try {
+      const saved = localStorage.getItem(FONT_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        const found = DIARY_FONTS.find(f => f.name === parsed.name);
+        if (found) return found;
+      }
+    } catch {}
+    return DEFAULT_FONT;
+  });
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const current = parseISO(currentDate);
@@ -69,6 +86,15 @@ export const DiaryPage = memo(function DiaryPage({
     onContentChange(content, newMood);
     setLastSaved(new Date());
   }, [content, onContentChange]);
+
+  // Handle font change
+  const handleFontChange = useCallback((font: DiaryFont) => {
+    setSelectedFont(font);
+    // Persist font preference
+    try {
+      localStorage.setItem(FONT_STORAGE_KEY, JSON.stringify({ name: font.name }));
+    } catch {}
+  }, []);
 
   // Swipe handling for page navigation
   const handleDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
@@ -192,30 +218,26 @@ export const DiaryPage = memo(function DiaryPage({
             </div>
 
             {/* Mood Selector */}
-            <div className="mb-4 pl-12">
+            <div className="mb-4 pl-12 flex items-center justify-between pr-4">
               <MoodSelector
                 selectedMood={mood}
                 onSelect={handleMoodChange}
+              />
+              
+              {/* Font Selector Toolbar */}
+              <DiaryFontSelector
+                selectedFont={selectedFont}
+                onFontChange={handleFontChange}
               />
             </div>
 
             {/* Writing Area */}
             <div className="pl-12 pr-4">
-              <textarea
-                ref={textareaRef}
-                value={content}
-                onChange={(e) => handleContentChange(e.target.value)}
+              <DiaryEditor
+                content={content}
+                font={selectedFont}
+                onChange={handleContentChange}
                 placeholder="Dear diary..."
-                className={cn(
-                  'w-full min-h-[350px] resize-none',
-                  'bg-transparent border-none outline-none',
-                  'text-foreground placeholder:text-muted-foreground/50',
-                  'font-serif text-lg leading-[28px]',
-                  'focus:ring-0 focus:outline-none'
-                )}
-                style={{
-                  lineHeight: '28px',
-                }}
               />
             </div>
 
