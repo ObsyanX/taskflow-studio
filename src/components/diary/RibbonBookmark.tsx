@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import { motion } from 'framer-motion';
-import { Bookmark } from 'lucide-react';
+import { Bookmark, X } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { cn } from '@/lib/utils';
 
@@ -9,6 +9,7 @@ interface RibbonBookmarkProps {
   currentDate: string;
   onJumpToBookmark: () => void;
   onSetBookmark: () => void;
+  onRemoveBookmark: () => void;
 }
 
 export const RibbonBookmark = memo(function RibbonBookmark({
@@ -16,6 +17,7 @@ export const RibbonBookmark = memo(function RibbonBookmark({
   currentDate,
   onJumpToBookmark,
   onSetBookmark,
+  onRemoveBookmark,
 }: RibbonBookmarkProps) {
   const isCurrentDateBookmarked = bookmarkedDate === currentDate;
 
@@ -32,9 +34,9 @@ export const RibbonBookmark = memo(function RibbonBookmark({
         <div
           className={cn(
             'w-4 h-24 shadow-lg transition-colors cursor-pointer',
-            isCurrentDateBookmarked
+            bookmarkedDate
               ? 'bg-gradient-to-b from-red-600 to-red-800'
-              : 'bg-gradient-to-b from-red-700/80 to-red-900/80'
+              : 'bg-gradient-to-b from-red-700/50 to-red-900/50'
           )}
           style={{
             clipPath: 'polygon(0 0, 100% 0, 100% 100%, 50% 90%, 0 100%)',
@@ -58,6 +60,7 @@ export const RibbonBookmark = memo(function RibbonBookmark({
 
         {/* Action buttons */}
         <div className="absolute -left-12 top-0 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          {/* Jump to bookmark button */}
           {bookmarkedDate && bookmarkedDate !== currentDate && (
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -70,6 +73,7 @@ export const RibbonBookmark = memo(function RibbonBookmark({
             </motion.button>
           )}
           
+          {/* Set bookmark button */}
           {!isCurrentDateBookmarked && (
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -79,6 +83,19 @@ export const RibbonBookmark = memo(function RibbonBookmark({
               title="Set bookmark here"
             >
               <Bookmark className="w-4 h-4 text-muted-foreground" />
+            </motion.button>
+          )}
+
+          {/* Remove bookmark button */}
+          {bookmarkedDate && (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={onRemoveBookmark}
+              className="w-10 h-10 rounded-lg bg-card border border-border shadow-sm flex items-center justify-center hover:bg-destructive/10 transition-colors"
+              title="Remove bookmark"
+            >
+              <X className="w-4 h-4 text-destructive" />
             </motion.button>
           )}
         </div>

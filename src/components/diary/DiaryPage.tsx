@@ -1,7 +1,7 @@
 import React, { memo, useState, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
-import { format, parseISO, addDays, subDays, isToday } from 'date-fns';
-import { Save, Lock, Settings, ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { format, parseISO, addDays, subDays, isToday, getMonth, getDate } from 'date-fns';
+import { Save, Lock, Settings, ChevronLeft, ChevronRight, Search, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DiaryEntry, DiaryMood } from '@/types/diary';
 import { MoodSelector } from './MoodSelector';
@@ -11,6 +11,7 @@ import { DiaryFontSelector, DiaryFont, DIARY_FONTS } from './DiaryFontSelector';
 import { DiaryEditor } from './DiaryEditor';
 import { DiaryToolbar } from './DiaryToolbar';
 import { ReflectionPrompt } from './ReflectionPrompt';
+import { OnThisDay } from './OnThisDay';
 import { usePageFlipSound } from '@/hooks/usePageFlipSound';
 
 interface DiaryPageProps {
@@ -21,7 +22,7 @@ interface DiaryPageProps {
   bookmarkedDate: string | null;
   onDateChange: (date: string) => void;
   onContentChange: (content: string, mood?: DiaryMood) => void;
-  onSetBookmark: (date: string) => void;
+  onSetBookmark: (date: string | null) => void;
   onLock: () => void;
   onOpenSettings: () => void;
   onOpenSearch: () => void;
@@ -51,6 +52,7 @@ export const DiaryPage = memo(function DiaryPage({
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [showReflectionPrompt, setShowReflectionPrompt] = useState(false);
+  const [showOnThisDay, setShowOnThisDay] = useState(true);
   const [selectedFont, setSelectedFont] = useState<DiaryFont>(() => {
     try {
       const saved = localStorage.getItem(FONT_STORAGE_KEY);
@@ -174,6 +176,22 @@ export const DiaryPage = memo(function DiaryPage({
     onSetBookmark(currentDate);
   }, [currentDate, onSetBookmark]);
 
+  const handleRemoveBookmark = useCallback(() => {
+    onSetBookmark(null);
+  }, [onSetBookmark]);
+
+  // Check if there are memories on this day
+  const hasOnThisDayMemories = entries.some((entry) => {
+    const current = parseISO(currentDate);
+    const entryDate = parseISO(entry.date);
+    return (
+      getMonth(entryDate) === getMonth(current) &&
+      getDate(entryDate) === getDate(current) &&
+      entry.date !== currentDate &&
+      entry.content.trim().length > 0
+    );
+  });
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -189,6 +207,24 @@ export const DiaryPage = memo(function DiaryPage({
         />
 
         <div className="flex items-center gap-2">
+          {/* On This Day button */}
+          {hasOnThisDayMemories && (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowOnThisDay(!showOnThisDay)}
+              className={cn(
+                'flex items-center gap-1.5 px-3 py-2 rounded-xl border transition-colors',
+                showOnThisDay
+                  ? 'bg-primary/10 border-primary/30 text-primary'
+                  : 'bg-card border-border text-muted-foreground hover:bg-muted'
+              )}
+              title="On This Day memories"
+            >
+              <Sparkles className="w-4 h-4" />
+            </motion.button>
+          )}
+
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -268,6 +304,7 @@ export const DiaryPage = memo(function DiaryPage({
             currentDate={currentDate}
             onJumpToBookmark={handleJumpToBookmark}
             onSetBookmark={handleSetBookmark}
+            onRemoveBookmark={handleRemoveBookmark}
           />
 
           {/* Page Content */}
@@ -295,6 +332,17 @@ export const DiaryPage = memo(function DiaryPage({
                 fontSize={fontSize}
                 onFontChange={handleFontChange}
                 onFontSizeChange={handleFontSizeChange}
+              />
+            </div>
+
+            {/* On This Day Memories */}
+            <div className="pl-12 pr-4">
+              <OnThisDay
+                currentDate={currentDate}
+                entries={entries}
+                onNavigateToEntry={handleDateChangeWithSound}
+                isOpen={showOnThisDay && hasOnThisDayMemories}
+                onClose={() => setShowOnThisDay(false)}
               />
             </div>
 
