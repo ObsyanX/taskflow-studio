@@ -5,6 +5,7 @@ import { DiaryLockScreen } from './DiaryLockScreen';
 import { PageFlipAnimation } from './PageFlipAnimation';
 import { DiaryPage } from './DiaryPage';
 import { DiarySettings } from './DiarySettings';
+import { DiarySearch } from './DiarySearch';
 import { DiaryMood } from '@/types/diary';
 
 interface DiaryViewProps {
@@ -36,6 +37,7 @@ export const DiaryView = memo(function DiaryView({ onBack }: DiaryViewProps) {
 
   const [diaryState, setDiaryState] = useState<DiaryState>('locked');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   // Get first entry date for animation
   const entryDates = getAllEntryDates();
@@ -77,6 +79,12 @@ export const DiaryView = memo(function DiaryView({ onBack }: DiaryViewProps) {
     setBookmark(date);
   }, [setBookmark]);
 
+  // Handle search select
+  const handleSearchSelect = useCallback((date: string) => {
+    setCurrentDate(date);
+    setIsSearchOpen(false);
+  }, [setCurrentDate]);
+
   // Reset state when unlocked changes
   React.useEffect(() => {
     if (!isUnlocked && diaryState !== 'locked') {
@@ -112,6 +120,7 @@ export const DiaryView = memo(function DiaryView({ onBack }: DiaryViewProps) {
             key="page"
             currentDate={currentDate}
             entry={currentEntry}
+            entries={entries}
             entryDates={entryDates}
             bookmarkedDate={getBookmarkedDate()}
             onDateChange={setCurrentDate}
@@ -119,6 +128,7 @@ export const DiaryView = memo(function DiaryView({ onBack }: DiaryViewProps) {
             onSetBookmark={handleSetBookmark}
             onLock={handleLock}
             onOpenSettings={() => setIsSettingsOpen(true)}
+            onOpenSearch={() => setIsSearchOpen(true)}
           />
         )}
       </AnimatePresence>
@@ -131,6 +141,17 @@ export const DiaryView = memo(function DiaryView({ onBack }: DiaryViewProps) {
             autoLockMinutes={settings?.autoLockMinutes || 5}
             onClose={() => setIsSettingsOpen(false)}
             onAutoLockChange={updateAutoLock}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Search Modal */}
+      <AnimatePresence>
+        {isSearchOpen && (
+          <DiarySearch
+            entries={entries}
+            onSelectEntry={handleSearchSelect}
+            onClose={() => setIsSearchOpen(false)}
           />
         )}
       </AnimatePresence>

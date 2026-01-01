@@ -1,7 +1,7 @@
 import React, { memo, useState, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import { format, parseISO, addDays, subDays, isToday } from 'date-fns';
-import { Save, Lock, Settings, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Save, Lock, Settings, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DiaryEntry, DiaryMood } from '@/types/diary';
 import { MoodSelector } from './MoodSelector';
@@ -9,10 +9,14 @@ import { RibbonBookmark } from './RibbonBookmark';
 import { DiaryDateNav } from './DiaryDateNav';
 import { DiaryFontSelector, DiaryFont, DIARY_FONTS } from './DiaryFontSelector';
 import { DiaryEditor } from './DiaryEditor';
+import { DiaryToolbar } from './DiaryToolbar';
+import { ReflectionPrompt } from './ReflectionPrompt';
+import { usePageFlipSound } from '@/hooks/usePageFlipSound';
 
 interface DiaryPageProps {
   currentDate: string;
   entry: DiaryEntry | null;
+  entries: DiaryEntry[];
   entryDates: string[];
   bookmarkedDate: string | null;
   onDateChange: (date: string) => void;
@@ -20,15 +24,19 @@ interface DiaryPageProps {
   onSetBookmark: (date: string) => void;
   onLock: () => void;
   onOpenSettings: () => void;
+  onOpenSearch: () => void;
 }
 
 // Default to a beautiful handwriting font
 const DEFAULT_FONT = DIARY_FONTS.find(f => f.name === 'Dancing Script') || DIARY_FONTS[0];
 const FONT_STORAGE_KEY = 'diary-selected-font';
+const FONT_SIZE_STORAGE_KEY = 'diary-font-size';
+const PROMPT_DISMISSED_KEY = 'diary-prompt-dismissed';
 
 export const DiaryPage = memo(function DiaryPage({
   currentDate,
   entry,
+  entries,
   entryDates,
   bookmarkedDate,
   onDateChange,
@@ -36,13 +44,14 @@ export const DiaryPage = memo(function DiaryPage({
   onSetBookmark,
   onLock,
   onOpenSettings,
+  onOpenSearch,
 }: DiaryPageProps) {
   const [content, setContent] = useState(entry?.content || '');
   const [mood, setMood] = useState<DiaryMood | undefined>(entry?.mood);
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [showReflectionPrompt, setShowReflectionPrompt] = useState(false);
   const [selectedFont, setSelectedFont] = useState<DiaryFont>(() => {
-    // Load saved font preference
     try {
       const saved = localStorage.getItem(FONT_STORAGE_KEY);
       if (saved) {
@@ -53,10 +62,30 @@ export const DiaryPage = memo(function DiaryPage({
     } catch {}
     return DEFAULT_FONT;
   });
+  const [fontSize, setFontSize] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem(FONT_SIZE_STORAGE_KEY);
+      if (saved) return parseInt(saved, 10);
+    } catch {}
+    return 19;
+  });
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const { playPageFlip } = usePageFlipSound();
 
   const current = parseISO(currentDate);
   const isCurrentToday = isToday(current);
+
+  // Show reflection prompt for new entries on today's date
+  useEffect(() => {
+    if (isCurrentToday && !entry?.content) {
+      const dismissed = sessionStorage.getItem(PROMPT_DISMISSED_KEY);
+      if (!dismissed) {
+        setShowReflectionPrompt(true);
+      }
+    } else {
+      setShowReflectionPrompt(false);
+    }
+  }, [isCurrentToday, entry?.content]);
 
   // Update local state when entry changes
   useEffect(() => {
@@ -90,30 +119,56 @@ export const DiaryPage = memo(function DiaryPage({
   // Handle font change
   const handleFontChange = useCallback((font: DiaryFont) => {
     setSelectedFont(font);
-    // Persist font preference
     try {
       localStorage.setItem(FONT_STORAGE_KEY, JSON.stringify({ name: font.name }));
     } catch {}
   }, []);
 
-  // Swipe handling for page navigation
+  // Handle font size change
+  const handleFontSizeChange = useCallback((size: number) => {
+    setFontSize(size);
+    try {
+      localStorage.setItem(FONT_SIZE_STORAGE_KEY, size.toString());
+    } catch {}
+  }, []);
+
+  // Handle reflection prompt use
+  const handleUsePrompt = useCallback((prompt: string) => {
+    const promptText = `<strong>${prompt}</strong><br><br>`;
+    setContent(promptText);
+    onContentChange(promptText, mood);
+    setShowReflectionPrompt(false);
+    sessionStorage.setItem(PROMPT_DISMISSED_KEY, 'true');
+  }, [mood, onContentChange]);
+
+  // Dismiss reflection prompt
+  const handleDismissPrompt = useCallback(() => {
+    setShowReflectionPrompt(false);
+    sessionStorage.setItem(PROMPT_DISMISSED_KEY, 'true');
+  }, []);
+
+  // Swipe handling for page navigation with sound
+  const handleDateChangeWithSound = useCallback((newDate: string) => {
+    playPageFlip();
+    onDateChange(newDate);
+  }, [onDateChange, playPageFlip]);
+
   const handleDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const swipeThreshold = 100;
     
     if (info.offset.x > swipeThreshold) {
-      // Swipe right = previous day
-      onDateChange(format(subDays(current, 1), 'yyyy-MM-dd'));
+      handleDateChangeWithSound(format(subDays(current, 1), 'yyyy-MM-dd'));
     } else if (info.offset.x < -swipeThreshold && !isCurrentToday) {
-      // Swipe left = next day
-      onDateChange(format(addDays(current, 1), 'yyyy-MM-dd'));
+      handleDateChangeWithSound(format(addDays(current, 1), 'yyyy-MM-dd'));
     }
-  }, [current, isCurrentToday, onDateChange]);
+  }, [current, isCurrentToday, handleDateChangeWithSound]);
 
   const handleJumpToBookmark = useCallback(() => {
     if (bookmarkedDate) {
+      playPageFlip();
       onDateChange(bookmarkedDate);
     }
-  }, [bookmarkedDate, onDateChange]);
+  }, [bookmarkedDate, onDateChange, playPageFlip]);
 
   const handleSetBookmark = useCallback(() => {
     onSetBookmark(currentDate);
@@ -130,10 +185,20 @@ export const DiaryPage = memo(function DiaryPage({
         <DiaryDateNav
           currentDate={currentDate}
           entryDates={entryDates}
-          onDateChange={onDateChange}
+          onDateChange={handleDateChangeWithSound}
         />
 
         <div className="flex items-center gap-2">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onOpenSearch}
+            className="w-10 h-10 rounded-xl bg-card border border-border flex items-center justify-center hover:bg-muted transition-colors"
+            title="Search entries"
+          >
+            <Search className="w-4 h-4 text-muted-foreground" />
+          </motion.button>
+
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -217,18 +282,32 @@ export const DiaryPage = memo(function DiaryPage({
               </p>
             </div>
 
-            {/* Mood Selector */}
-            <div className="mb-4 pl-12 flex items-center justify-between pr-4">
+            {/* Mood Selector & Toolbar */}
+            <div className="mb-4 pl-12 pr-4 space-y-3">
               <MoodSelector
                 selectedMood={mood}
                 onSelect={handleMoodChange}
               />
               
-              {/* Font Selector Toolbar */}
-              <DiaryFontSelector
+              {/* Font & Formatting Toolbar */}
+              <DiaryToolbar
                 selectedFont={selectedFont}
+                fontSize={fontSize}
                 onFontChange={handleFontChange}
+                onFontSizeChange={handleFontSizeChange}
               />
+            </div>
+
+            {/* Reflection Prompt */}
+            <div className="pl-12 pr-4">
+              <AnimatePresence>
+                {showReflectionPrompt && (
+                  <ReflectionPrompt
+                    onUsePrompt={handleUsePrompt}
+                    onDismiss={handleDismissPrompt}
+                  />
+                )}
+              </AnimatePresence>
             </div>
 
             {/* Writing Area */}
@@ -236,6 +315,7 @@ export const DiaryPage = memo(function DiaryPage({
               <DiaryEditor
                 content={content}
                 font={selectedFont}
+                fontSize={fontSize}
                 onChange={handleContentChange}
                 placeholder="Dear diary..."
               />

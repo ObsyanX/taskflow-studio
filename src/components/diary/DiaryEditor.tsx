@@ -6,6 +6,7 @@ import { DiaryFont } from './DiaryFontSelector';
 interface DiaryEditorProps {
   content: string;
   font: DiaryFont;
+  fontSize: number;
   onChange: (content: string) => void;
   placeholder?: string;
 }
@@ -13,6 +14,7 @@ interface DiaryEditorProps {
 export const DiaryEditor = memo(function DiaryEditor({
   content,
   font,
+  fontSize,
   onChange,
   placeholder = 'Dear diary...',
 }: DiaryEditorProps) {
@@ -123,8 +125,8 @@ export const DiaryEditor = memo(function DiaryEditor({
         )}
         style={{
           fontFamily: font.family,
-          fontSize: '19px',
-          lineHeight: '32px',
+          fontSize: `${fontSize}px`,
+          lineHeight: `${Math.max(fontSize * 1.6, 28)}px`,
           caretColor: 'hsl(var(--foreground) / 0.7)',
           WebkitFontSmoothing: 'antialiased',
           MozOsxFontSmoothing: 'grayscale',
