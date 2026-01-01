@@ -27,7 +27,7 @@ interface UseDiaryReturn {
   updateEntry: (content: string, mood?: DiaryMood) => Promise<void>;
   getEntriesForDate: (date: string) => DiaryEntry | undefined;
   getAllEntryDates: () => string[];
-  setBookmark: (date: string) => void;
+  setBookmark: (date: string | null) => void;
   getBookmarkedDate: () => string | null;
   updateAutoLock: (minutes: number) => void;
 }
@@ -242,7 +242,7 @@ export function useDiary(): UseDiaryReturn {
   }, [entries]);
 
   // Set bookmark
-  const setBookmark = useCallback((date: string) => {
+  const setBookmark = useCallback((date: string | null) => {
     if (settings) {
       setSettings({
         ...settings,

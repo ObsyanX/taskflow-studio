@@ -75,7 +75,7 @@ export const DiaryView = memo(function DiaryView({ onBack }: DiaryViewProps) {
   }, [updateEntry]);
 
   // Handle bookmark
-  const handleSetBookmark = useCallback((date: string) => {
+  const handleSetBookmark = useCallback((date: string | null) => {
     setBookmark(date);
   }, [setBookmark]);
 
