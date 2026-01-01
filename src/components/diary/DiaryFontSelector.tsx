@@ -79,7 +79,7 @@ export const DiaryFontSelector = memo(function DiaryFontSelector({
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
           'flex items-center gap-2 px-3 py-2 rounded-lg',
-          'bg-card/80 backdrop-blur-sm border border-border/50',
+          'bg-transparent border border-border/50',
           'hover:bg-muted/50 transition-colors',
           'min-w-[180px] justify-between'
         )}
