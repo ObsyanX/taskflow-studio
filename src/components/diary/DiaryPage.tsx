@@ -318,22 +318,22 @@ export const DiaryPage = memo(function DiaryPage({
 
           {/* Page Content */}
           <div className="relative p-6 pt-8">
-            {/* Date Header */}
-            <div className="mb-6 pl-12">
-              <h2 className="font-serif text-xl text-foreground">
-                {format(current, 'EEEE')}
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                {format(current, 'MMMM d, yyyy')}
-              </p>
-            </div>
-
-            {/* Mood Selector & Toolbar */}
-            <div className="mb-4 pl-12 pr-4 space-y-2">
-              <MoodSelector
-                selectedMood={mood}
-                onSelect={handleMoodChange}
-              />
+            {/* Date Header with Toolbar */}
+            <div className="mb-4 pl-12 pr-4 space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div>
+                  <h2 className="font-serif text-xl text-foreground">
+                    {format(current, 'EEEE')}
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    {format(current, 'MMMM d, yyyy')}
+                  </p>
+                </div>
+                <MoodSelector
+                  selectedMood={mood}
+                  onSelect={handleMoodChange}
+                />
+              </div>
               
               {/* Combined Toolbar with Photos */}
               <DiaryToolbar
