@@ -20,12 +20,13 @@ import { useNotifications } from '@/hooks/useNotifications';
 import { Task, FilterType, SortType, Priority, ReminderTime, RecurrenceType } from '@/types/task';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-
 type ViewMode = 'list' | 'calendar' | 'weekly' | 'diary';
-
 const Index = () => {
-  const { theme, toggleTheme } = useTheme();
-  
+  const {
+    theme,
+    toggleTheme
+  } = useTheme();
+
   // UI State
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [filter, setFilter] = useState<FilterType>('all');
@@ -54,11 +55,13 @@ const Index = () => {
     toggleTask,
     restoreTask,
     markReminderFired,
-    stats,
+    stats
   } = useTasks(filter, sortBy, debouncedSearch);
 
   // Notifications
-  const { requestPermission } = useNotifications(tasks, markReminderFired);
+  const {
+    requestPermission
+  } = useNotifications(tasks, markReminderFired);
 
   // Request notification permission on mount
   useEffect(() => {
@@ -66,31 +69,20 @@ const Index = () => {
   }, [requestPermission]);
 
   // Handlers
-  const handleAddTask = useCallback((
-    title: string,
-    desc: string,
-    due: string | null,
-    priority: Priority,
-    reminder: ReminderTime,
-    categoryId?: string,
-    recurrence?: RecurrenceType
-  ) => {
+  const handleAddTask = useCallback((title: string, desc: string, due: string | null, priority: Priority, reminder: ReminderTime, categoryId?: string, recurrence?: RecurrenceType) => {
     addTask(title, desc, due, priority, reminder, categoryId, recurrence);
     setPreselectedDate(null);
   }, [addTask]);
-
   const handleAddTaskFromCalendar = useCallback((date: Date) => {
     setPreselectedDate(format(date, 'yyyy-MM-dd'));
     setIsFormExpanded(true);
   }, []);
-
   const handleRequestDelete = useCallback((id: string) => {
     const task = tasks.find(t => t.id === id);
     if (task) {
       setTaskToDelete(task);
     }
   }, [tasks]);
-
   const handleConfirmDelete = useCallback(() => {
     if (taskToDelete) {
       const task = deleteTask(taskToDelete.id);
@@ -100,37 +92,27 @@ const Index = () => {
       setTaskToDelete(null);
     }
   }, [taskToDelete, deleteTask]);
-
   const handleCancelDelete = useCallback(() => {
     setTaskToDelete(null);
   }, []);
-
   const handleUndo = useCallback(() => {
     if (deletedTask) {
       restoreTask(deletedTask);
       setDeletedTask(null);
     }
   }, [deletedTask, restoreTask]);
-
   const handleDismissUndo = useCallback(() => {
     setDeletedTask(null);
   }, []);
-
   const handleEditTask = useCallback((task: Task) => {
     setEditingTask(task);
   }, []);
-
-  const handleSaveEdit = useCallback((
-    id: string,
-    updates: Partial<Omit<Task, 'id' | 'createdAt'>>
-  ) => {
+  const handleSaveEdit = useCallback((id: string, updates: Partial<Omit<Task, 'id' | 'createdAt'>>) => {
     updateTask(id, updates);
   }, [updateTask]);
-
   const handleCloseEdit = useCallback(() => {
     setEditingTask(null);
   }, []);
-
   const handleToggleForm = useCallback(() => {
     setIsFormExpanded(prev => !prev);
     if (isFormExpanded) {
@@ -152,154 +134,62 @@ const Index = () => {
         setIsFormExpanded(false);
         setPreselectedDate(null);
       }
-    },
+    }
   });
-
-  return (
-    <div className="min-h-screen bg-background theme-transition">
+  return <div className="min-h-screen bg-background theme-transition">
       <Spotlight enabled={true} />
 
-      <div 
-        className="fixed inset-0 pointer-events-none opacity-[0.02] dark:opacity-[0.03]"
-        style={{
-          backgroundImage: `radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)`,
-          backgroundSize: '40px 40px',
-        }}
-        aria-hidden="true"
-      />
+      <div className="fixed inset-0 pointer-events-none opacity-[0.02] dark:opacity-[0.03]" style={{
+      backgroundImage: `radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)`,
+      backgroundSize: '40px 40px'
+    }} aria-hidden="true" />
 
-      <motion.main
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3 }}
-        className="relative z-10 mx-auto max-w-2xl px-3 py-6 sm:px-6 sm:py-12"
-      >
-        <Header
-          theme={theme}
-          onToggleTheme={toggleTheme}
-          stats={stats}
-        />
+      <motion.main initial={{
+      opacity: 0
+    }} animate={{
+      opacity: 1
+    }} transition={{
+      duration: 0.3
+    }} className="relative z-10 mx-auto max-w-2xl px-3 py-6 sm:px-6 sm:py-12">
+        <Header theme={theme} onToggleTheme={toggleTheme} stats={stats} />
 
         {/* View Toggle */}
         <div className="flex items-center justify-center gap-2 mb-6">
           <div className="inline-flex items-center rounded-xl bg-muted p-1">
-            <button
-              onClick={() => setViewMode('list')}
-              className={cn(
-                'flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all',
-                viewMode === 'list'
-                  ? 'bg-card text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              )}
-            >
+            <button onClick={() => setViewMode('list')} className={cn('flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all', viewMode === 'list' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}>
               <List className="w-4 h-4" />
               <span className="hidden sm:inline">List</span>
             </button>
-            <button
-              onClick={() => setViewMode('weekly')}
-              className={cn(
-                'flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all',
-                viewMode === 'weekly'
-                  ? 'bg-card text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              )}
-            >
+            <button onClick={() => setViewMode('weekly')} className={cn('flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all', viewMode === 'weekly' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}>
               <CalendarDays className="w-4 h-4" />
               <span className="hidden sm:inline">Week</span>
             </button>
-            <button
-              onClick={() => setViewMode('calendar')}
-              className={cn(
-                'flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all',
-                viewMode === 'calendar'
-                  ? 'bg-card text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              )}
-            >
+            <button onClick={() => setViewMode('calendar')} className={cn('flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all', viewMode === 'calendar' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}>
               <Calendar className="w-4 h-4" />
               <span className="hidden sm:inline">Month</span>
             </button>
-            <button
-              onClick={() => setViewMode('diary')}
-              className={cn(
-                'flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all',
-                viewMode === 'diary'
-                  ? 'bg-card text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              )}
-            >
+            <button onClick={() => setViewMode('diary')} className={cn('flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all', viewMode === 'diary' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}>
               <BookOpen className="w-4 h-4" />
               <span className="hidden sm:inline">Diary</span>
             </button>
           </div>
         </div>
 
-        <TaskForm
-          onSubmit={handleAddTask}
-          isExpanded={isFormExpanded}
-          onToggleExpand={handleToggleForm}
-          preselectedDate={preselectedDate}
-        />
+        
 
-        {viewMode === 'diary' ? (
-          <DiaryView />
-        ) : viewMode === 'list' ? (
-          <>
-            <TaskForm
-              onSubmit={handleAddTask}
-              isExpanded={isFormExpanded}
-              onToggleExpand={handleToggleForm}
-              preselectedDate={preselectedDate}
-            />
+        {viewMode === 'diary' ? <DiaryView /> : viewMode === 'list' ? <>
+            <TaskForm onSubmit={handleAddTask} isExpanded={isFormExpanded} onToggleExpand={handleToggleForm} preselectedDate={preselectedDate} />
 
-            <FilterBar
-              filter={filter}
-              onFilterChange={setFilter}
-              sortBy={sortBy}
-              onSortChange={setSortBy}
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
-              searchInputRef={searchInputRef}
-              stats={stats}
-            />
+            <FilterBar filter={filter} onFilterChange={setFilter} sortBy={sortBy} onSortChange={setSortBy} searchQuery={searchQuery} onSearchChange={setSearchQuery} searchInputRef={searchInputRef} stats={stats} />
 
-            <TaskList
-              tasks={filteredTasks}
-              loading={loading}
-              onToggle={toggleTask}
-              onEdit={handleEditTask}
-              onDelete={handleRequestDelete}
-            />
-          </>
-        ) : viewMode === 'weekly' ? (
-          <>
-            <TaskForm
-              onSubmit={handleAddTask}
-              isExpanded={isFormExpanded}
-              onToggleExpand={handleToggleForm}
-              preselectedDate={preselectedDate}
-            />
-            <WeeklyAgendaView
-              tasks={tasks}
-              onTaskClick={handleEditTask}
-              onAddTask={handleAddTaskFromCalendar}
-            />
-          </>
-        ) : (
-          <>
-            <TaskForm
-              onSubmit={handleAddTask}
-              isExpanded={isFormExpanded}
-              onToggleExpand={handleToggleForm}
-              preselectedDate={preselectedDate}
-            />
-            <CalendarView
-              tasks={tasks}
-              onTaskClick={handleEditTask}
-              onAddTask={handleAddTaskFromCalendar}
-            />
-          </>
-        )}
+            <TaskList tasks={filteredTasks} loading={loading} onToggle={toggleTask} onEdit={handleEditTask} onDelete={handleRequestDelete} />
+          </> : viewMode === 'weekly' ? <>
+            <TaskForm onSubmit={handleAddTask} isExpanded={isFormExpanded} onToggleExpand={handleToggleForm} preselectedDate={preselectedDate} />
+            <WeeklyAgendaView tasks={tasks} onTaskClick={handleEditTask} onAddTask={handleAddTaskFromCalendar} />
+          </> : <>
+            <TaskForm onSubmit={handleAddTask} isExpanded={isFormExpanded} onToggleExpand={handleToggleForm} preselectedDate={preselectedDate} />
+            <CalendarView tasks={tasks} onTaskClick={handleEditTask} onAddTask={handleAddTaskFromCalendar} />
+          </>}
 
         <footer className="mt-12 pt-6 border-t border-border text-center">
           <p className="text-sm text-muted-foreground">
@@ -308,27 +198,11 @@ const Index = () => {
         </footer>
       </motion.main>
 
-      <EditTaskDialog
-        task={editingTask}
-        isOpen={!!editingTask}
-        onClose={handleCloseEdit}
-        onSave={handleSaveEdit}
-      />
+      <EditTaskDialog task={editingTask} isOpen={!!editingTask} onClose={handleCloseEdit} onSave={handleSaveEdit} />
 
-      <DeleteConfirmDialog
-        isOpen={!!taskToDelete}
-        taskTitle={taskToDelete?.title || ''}
-        onConfirm={handleConfirmDelete}
-        onCancel={handleCancelDelete}
-      />
+      <DeleteConfirmDialog isOpen={!!taskToDelete} taskTitle={taskToDelete?.title || ''} onConfirm={handleConfirmDelete} onCancel={handleCancelDelete} />
 
-      <UndoToast
-        deletedTask={deletedTask}
-        onUndo={handleUndo}
-        onDismiss={handleDismissUndo}
-      />
-    </div>
-  );
+      <UndoToast deletedTask={deletedTask} onUndo={handleUndo} onDismiss={handleDismissUndo} />
+    </div>;
 };
-
 export default Index;

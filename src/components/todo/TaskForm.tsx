@@ -6,22 +6,19 @@ import { getReminderLabel } from '@/hooks/useNotifications';
 import { CategorySelector } from './CategorySelector';
 import { RecurrenceSelector } from './RecurrenceSelector';
 import { cn } from '@/lib/utils';
-
 interface TaskFormProps {
   onSubmit: (title: string, desc: string, due: string | null, priority: Priority, reminder: ReminderTime, categoryId?: string, recurrence?: RecurrenceType) => void;
   isExpanded: boolean;
   onToggleExpand: () => void;
   preselectedDate?: string | null;
 }
-
 const priorityOptions: Priority[] = ['High', 'Medium', 'Low'];
 const reminderOptions: ReminderTime[] = ['none', '5min', '15min', '30min', '1hour', '1day'];
-
 export const TaskForm = memo(function TaskForm({
   onSubmit,
   isExpanded,
   onToggleExpand,
-  preselectedDate,
+  preselectedDate
 }: TaskFormProps) {
   const [title, setTitle] = useState('');
   const [desc, setDesc] = useState('');
@@ -32,9 +29,7 @@ export const TaskForm = memo(function TaskForm({
   const [categoryId, setCategoryId] = useState<string | undefined>(undefined);
   const [recurrence, setRecurrence] = useState<RecurrenceType>('none');
   const [error, setError] = useState('');
-
   const inputRef = useRef<HTMLInputElement>(null);
-
   useEffect(() => {
     if (isExpanded && inputRef.current) {
       inputRef.current.focus();
@@ -44,10 +39,8 @@ export const TaskForm = memo(function TaskForm({
       setDueDate(preselectedDate);
     }
   }, [isExpanded, preselectedDate]);
-
   const handleSubmit = useCallback((e?: React.FormEvent) => {
     e?.preventDefault();
-
     if (!title.trim()) {
       setError('Task title is required');
       return;
@@ -58,9 +51,8 @@ export const TaskForm = memo(function TaskForm({
     if (dueDate) {
       dueDateTime = dueTime ? `${dueDate}T${dueTime}:00` : `${dueDate}T00:00:00`;
     }
-
     onSubmit(title, desc, dueDateTime, priority, reminder, categoryId, recurrence);
-    
+
     // Reset form
     setTitle('');
     setDesc('');
@@ -73,7 +65,6 @@ export const TaskForm = memo(function TaskForm({
     setError('');
     onToggleExpand();
   }, [title, desc, dueDate, dueTime, priority, reminder, categoryId, recurrence, onSubmit, onToggleExpand]);
-
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey && title.trim()) {
       e.preventDefault();
@@ -82,25 +73,22 @@ export const TaskForm = memo(function TaskForm({
       onToggleExpand();
     }
   }, [handleSubmit, title, onToggleExpand]);
-
   const handleTitleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(e.target.value);
     if (error) setError('');
   }, [error]);
-
-  return (
-    <div className="mb-6">
+  return <div className="mb-6">
       <AnimatePresence mode="wait">
-        {!isExpanded ? (
-          <motion.button
-            key="add-button"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            onClick={onToggleExpand}
-            className="w-full flex items-center gap-3 p-4 rounded-xl bg-card border-2 border-dashed border-border hover:border-primary/50 hover:bg-card-hover transition-all group"
-            aria-label="Add new task"
-          >
+        {!isExpanded ? <motion.button key="add-button" initial={{
+        opacity: 0,
+        y: -10
+      }} animate={{
+        opacity: 1,
+        y: 0
+      }} exit={{
+        opacity: 0,
+        y: -10
+      }} onClick={onToggleExpand} className="w-full flex items-center gap-3 p-4 rounded-xl bg-card border-2 border-dashed border-border hover:border-primary/50 hover:bg-card-hover transition-all group" aria-label="Add new task">
             <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
               <Plus className="w-5 h-5 text-primary" />
             </div>
@@ -110,54 +98,40 @@ export const TaskForm = memo(function TaskForm({
             <span className="ml-auto text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
               Press N
             </span>
-          </motion.button>
-        ) : (
-          <motion.form
-            key="form"
-            initial={{ opacity: 0, y: -10, height: 0 }}
-            animate={{ opacity: 1, y: 0, height: 'auto' }}
-            exit={{ opacity: 0, y: -10, height: 0 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            onSubmit={handleSubmit}
-            className="overflow-hidden"
-          >
+          </motion.button> : <motion.form key="form" initial={{
+        opacity: 0,
+        y: -10,
+        height: 0
+      }} animate={{
+        opacity: 1,
+        y: 0,
+        height: 'auto'
+      }} exit={{
+        opacity: 0,
+        y: -10,
+        height: 0
+      }} transition={{
+        type: 'spring',
+        stiffness: 300,
+        damping: 30
+      }} onSubmit={handleSubmit} className="overflow-hidden">
             <div className="p-4 rounded-xl bg-card border border-border shadow-lg space-y-4">
               {/* Title Input */}
               <div>
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={title}
-                  onChange={handleTitleChange}
-                  onKeyDown={handleKeyDown}
-                  placeholder="What needs to be done?"
-                  className={cn(
-                    'input-modern text-lg font-medium',
-                    error && 'border-destructive focus:border-destructive'
-                  )}
-                  aria-label="Task title"
-                  aria-invalid={!!error}
-                />
-                {error && (
-                  <motion.p
-                    initial={{ opacity: 0, y: -5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mt-1 text-sm text-destructive"
-                    role="alert"
-                  >
+                <input ref={inputRef} type="text" value={title} onChange={handleTitleChange} onKeyDown={handleKeyDown} placeholder="What needs to be done?" className={cn('input-modern text-lg font-medium', error && 'border-destructive focus:border-destructive')} aria-label="Task title" aria-invalid={!!error} />
+                {error && <motion.p initial={{
+              opacity: 0,
+              y: -5
+            }} animate={{
+              opacity: 1,
+              y: 0
+            }} className="mt-1 text-sm text-destructive" role="alert">
                     {error}
-                  </motion.p>
-                )}
+                  </motion.p>}
               </div>
 
               {/* Description */}
-              <textarea
-                value={desc}
-                onChange={(e) => setDesc(e.target.value)}
-                placeholder="Add a description (optional)"
-                className="input-modern min-h-[80px] resize-none"
-                aria-label="Task description"
-              />
+              <textarea value={desc} onChange={e => setDesc(e.target.value)} placeholder="Add a description (optional)" className="input-modern min-h-[80px] resize-none" aria-label="Task description" />
 
               {/* Due Date, Time & Priority */}
               <div className="flex flex-wrap gap-3">
@@ -166,27 +140,14 @@ export const TaskForm = memo(function TaskForm({
                     <Calendar className="w-4 h-4" />
                     Due Date
                   </label>
-                  <input
-                    type="date"
-                    value={dueDate}
-                    onChange={(e) => setDueDate(e.target.value)}
-                    className="input-modern"
-                    aria-label="Due date"
-                  />
+                  <input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} className="input-modern" aria-label="Due date" />
                 </div>
                 <div className="flex-1 min-w-[120px]">
                   <label className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
                     <Clock className="w-4 h-4" />
                     Due Time
                   </label>
-                  <input
-                    type="time"
-                    value={dueTime}
-                    onChange={(e) => setDueTime(e.target.value)}
-                    className="input-modern"
-                    aria-label="Due time"
-                    disabled={!dueDate}
-                  />
+                  <input type="time" value={dueTime} onChange={e => setDueTime(e.target.value)} className="input-modern" aria-label="Due time" disabled={!dueDate} />
                 </div>
                 <div className="flex-1 min-w-[200px]">
                   <label className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
@@ -194,35 +155,15 @@ export const TaskForm = memo(function TaskForm({
                     Priority
                   </label>
                   <div className="flex gap-2">
-                    {priorityOptions.map((p) => (
-                      <button
-                        key={p}
-                        type="button"
-                        onClick={() => setPriority(p)}
-                        className={cn(
-                          'flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all',
-                          priority === p
-                            ? p === 'High'
-                              ? 'bg-destructive/10 text-destructive ring-2 ring-destructive/30'
-                              : p === 'Medium'
-                              ? 'bg-warning/10 text-warning ring-2 ring-warning/30'
-                              : 'bg-muted text-muted-foreground ring-2 ring-muted-foreground/30'
-                            : 'bg-muted/50 text-muted-foreground hover:bg-muted'
-                        )}
-                        aria-pressed={priority === p}
-                      >
+                    {priorityOptions.map(p => <button key={p} type="button" onClick={() => setPriority(p)} className={cn('flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all', priority === p ? p === 'High' ? 'bg-destructive/10 text-destructive ring-2 ring-destructive/30' : p === 'Medium' ? 'bg-warning/10 text-warning ring-2 ring-warning/30' : 'bg-muted text-muted-foreground ring-2 ring-muted-foreground/30' : 'bg-muted/50 text-muted-foreground hover:bg-muted')} aria-pressed={priority === p}>
                         {p}
-                      </button>
-                    ))}
+                      </button>)}
                   </div>
                 </div>
               </div>
 
               {/* Category */}
-              <CategorySelector
-                selectedCategoryId={categoryId}
-                onSelect={setCategoryId}
-              />
+              <CategorySelector selectedCategoryId={categoryId} onSelect={setCategoryId} />
 
               {/* Reminder */}
               <div>
@@ -231,55 +172,27 @@ export const TaskForm = memo(function TaskForm({
                   Reminder
                 </label>
                 <div className="flex flex-wrap gap-2">
-                  {reminderOptions.map((r) => (
-                    <button
-                      key={r}
-                      type="button"
-                      onClick={() => setReminder(r)}
-                      disabled={!dueDate}
-                      className={cn(
-                        'px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all',
-                        !dueDate && 'opacity-50 cursor-not-allowed',
-                        reminder === r
-                          ? 'bg-primary/10 text-primary ring-2 ring-primary/30'
-                          : 'bg-muted/50 text-muted-foreground hover:bg-muted'
-                      )}
-                      aria-pressed={reminder === r}
-                    >
+                  {reminderOptions.map(r => <button key={r} type="button" onClick={() => setReminder(r)} disabled={!dueDate} className={cn('px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all', !dueDate && 'opacity-50 cursor-not-allowed', reminder === r ? 'bg-primary/10 text-primary ring-2 ring-primary/30' : 'bg-muted/50 text-muted-foreground hover:bg-muted')} aria-pressed={reminder === r}>
                       {getReminderLabel(r)}
-                    </button>
-                  ))}
+                    </button>)}
                 </div>
               </div>
 
               {/* Recurrence */}
-              <RecurrenceSelector
-                value={recurrence}
-                onChange={setRecurrence}
-                disabled={!dueDate}
-              />
+              <RecurrenceSelector value={recurrence} onChange={setRecurrence} disabled={!dueDate} />
 
               {/* Actions */}
               <div className="flex justify-end gap-2 pt-2 border-t border-border">
-                <button
-                  type="button"
-                  onClick={onToggleExpand}
-                  className="px-4 py-2 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                >
+                <button type="button" onClick={onToggleExpand} className="px-4 py-2 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  className="btn-primary"
-                >
+                <button type="submit" className="btn-primary">
                   <Plus className="w-4 h-4 mr-2" />
                   Add Task
                 </button>
               </div>
             </div>
-          </motion.form>
-        )}
+          </motion.form>}
       </AnimatePresence>
-    </div>
-  );
+    </div>;
 });
