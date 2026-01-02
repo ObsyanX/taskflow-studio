@@ -6,7 +6,7 @@ import { PageFlipAnimation } from './PageFlipAnimation';
 import { DiaryPage } from './DiaryPage';
 import { DiarySettings } from './DiarySettings';
 import { DiarySearch } from './DiarySearch';
-import { DiaryMood } from '@/types/diary';
+import { DiaryMood, DiaryImage } from '@/types/diary';
 
 interface DiaryViewProps {
   onBack?: () => void;
@@ -70,8 +70,8 @@ export const DiaryView = memo(function DiaryView({ onBack }: DiaryViewProps) {
   }, [lock]);
 
   // Handle content change
-  const handleContentChange = useCallback((content: string, mood?: DiaryMood) => {
-    updateEntry(content, mood);
+  const handleContentChange = useCallback((content: string, mood?: DiaryMood, images?: DiaryImage[]) => {
+    updateEntry(content, mood, images);
   }, [updateEntry]);
 
   // Handle bookmark

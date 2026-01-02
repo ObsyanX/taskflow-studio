@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { format } from 'date-fns';
-import { DiaryEntry, DiarySettings, DiaryMood, EncryptedDiaryData } from '@/types/diary';
+import { DiaryEntry, DiarySettings, DiaryMood, DiaryImage, EncryptedDiaryData } from '@/types/diary';
 import { encryptData, decryptData, hashPin, generateSalt } from '@/utils/encryption';
 import { useLocalStorage } from './useLocalStorage';
 
@@ -24,7 +24,7 @@ interface UseDiaryReturn {
   unlock: (pin: string) => Promise<boolean>;
   lock: () => void;
   setCurrentDate: (date: string) => void;
-  updateEntry: (content: string, mood?: DiaryMood) => Promise<void>;
+  updateEntry: (content: string, mood?: DiaryMood, images?: DiaryImage[]) => Promise<void>;
   getEntriesForDate: (date: string) => DiaryEntry | undefined;
   getAllEntryDates: () => string[];
   setBookmark: (date: string | null) => void;
@@ -198,7 +198,7 @@ export function useDiary(): UseDiaryReturn {
   const currentEntry = entries.find(e => e.date === currentDate) || null;
 
   // Update entry for current date
-  const updateEntry = useCallback(async (content: string, mood?: DiaryMood) => {
+  const updateEntry = useCallback(async (content: string, mood?: DiaryMood, images?: DiaryImage[]) => {
     resetAutoLock();
     
     setEntries(prev => {
@@ -212,6 +212,7 @@ export function useDiary(): UseDiaryReturn {
           ...updated[existingIndex],
           content,
           mood: mood ?? updated[existingIndex].mood,
+          images: images ?? updated[existingIndex].images,
           updatedAt: now,
         };
       } else {
@@ -220,6 +221,7 @@ export function useDiary(): UseDiaryReturn {
           date: currentDate,
           content,
           mood,
+          images,
           createdAt: now,
           updatedAt: now,
         };
