@@ -178,7 +178,7 @@ const Index = () => {
         
 
         {viewMode === 'diary' ? <DiaryView /> : viewMode === 'list' ? <>
-            <TaskForm onSubmit={handleAddTask} isExpanded={isFormExpanded} onToggleExpand={handleToggleForm} preselectedDate={preselectedDate} />
+            
 
             <FilterBar filter={filter} onFilterChange={setFilter} sortBy={sortBy} onSortChange={setSortBy} searchQuery={searchQuery} onSearchChange={setSearchQuery} searchInputRef={searchInputRef} stats={stats} />
 
