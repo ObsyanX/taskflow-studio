@@ -1,10 +1,18 @@
 export type DiaryMood = 'happy' | 'neutral' | 'sad' | 'excited' | 'anxious' | 'grateful';
 
+export interface DiaryImage {
+  id: string;
+  data: string; // base64 data URL
+  caption?: string;
+  addedAt: string;
+}
+
 export interface DiaryEntry {
   id: string;
   date: string; // YYYY-MM-DD format
   content: string;
   mood?: DiaryMood;
+  images?: DiaryImage[];
   createdAt: string;
   updatedAt: string;
 }

@@ -3,7 +3,7 @@ import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import { format, parseISO, addDays, subDays, isToday, getMonth, getDate } from 'date-fns';
 import { Save, Lock, Settings, ChevronLeft, ChevronRight, Search, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { DiaryEntry, DiaryMood } from '@/types/diary';
+import { DiaryEntry, DiaryMood, DiaryImage } from '@/types/diary';
 import { MoodSelector } from './MoodSelector';
 import { RibbonBookmark } from './RibbonBookmark';
 import { DiaryDateNav } from './DiaryDateNav';
@@ -12,6 +12,7 @@ import { DiaryEditor } from './DiaryEditor';
 import { DiaryToolbar } from './DiaryToolbar';
 import { ReflectionPrompt } from './ReflectionPrompt';
 import { OnThisDay } from './OnThisDay';
+import { DiaryImageAttachments } from './DiaryImageAttachments';
 import { usePageFlipSound } from '@/hooks/usePageFlipSound';
 
 interface DiaryPageProps {
@@ -21,7 +22,7 @@ interface DiaryPageProps {
   entryDates: string[];
   bookmarkedDate: string | null;
   onDateChange: (date: string) => void;
-  onContentChange: (content: string, mood?: DiaryMood) => void;
+  onContentChange: (content: string, mood?: DiaryMood, images?: DiaryImage[]) => void;
   onSetBookmark: (date: string | null) => void;
   onLock: () => void;
   onOpenSettings: () => void;
@@ -49,6 +50,7 @@ export const DiaryPage = memo(function DiaryPage({
 }: DiaryPageProps) {
   const [content, setContent] = useState(entry?.content || '');
   const [mood, setMood] = useState<DiaryMood | undefined>(entry?.mood);
+  const [images, setImages] = useState<DiaryImage[]>(entry?.images || []);
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [showReflectionPrompt, setShowReflectionPrompt] = useState(false);
@@ -93,6 +95,7 @@ export const DiaryPage = memo(function DiaryPage({
   useEffect(() => {
     setContent(entry?.content || '');
     setMood(entry?.mood);
+    setImages(entry?.images || []);
   }, [entry, currentDate]);
 
   // Auto-save with debouncing
@@ -105,18 +108,25 @@ export const DiaryPage = memo(function DiaryPage({
     }
 
     saveTimeoutRef.current = setTimeout(() => {
-      onContentChange(newContent, mood);
+      onContentChange(newContent, mood, images);
       setIsSaving(false);
       setLastSaved(new Date());
     }, 800);
-  }, [mood, onContentChange]);
+  }, [mood, images, onContentChange]);
+
+  // Handle images change
+  const handleImagesChange = useCallback((newImages: DiaryImage[]) => {
+    setImages(newImages);
+    onContentChange(content, mood, newImages);
+    setLastSaved(new Date());
+  }, [content, mood, onContentChange]);
 
   // Handle mood change
   const handleMoodChange = useCallback((newMood: DiaryMood) => {
     setMood(newMood);
-    onContentChange(content, newMood);
+    onContentChange(content, newMood, images);
     setLastSaved(new Date());
-  }, [content, onContentChange]);
+  }, [content, images, onContentChange]);
 
   // Handle font change
   const handleFontChange = useCallback((font: DiaryFont) => {
@@ -138,10 +148,10 @@ export const DiaryPage = memo(function DiaryPage({
   const handleUsePrompt = useCallback((prompt: string) => {
     const promptText = `<strong>${prompt}</strong><br><br>`;
     setContent(promptText);
-    onContentChange(promptText, mood);
+    onContentChange(promptText, mood, images);
     setShowReflectionPrompt(false);
     sessionStorage.setItem(PROMPT_DISMISSED_KEY, 'true');
-  }, [mood, onContentChange]);
+  }, [mood, images, onContentChange]);
 
   // Dismiss reflection prompt
   const handleDismissPrompt = useCallback(() => {
@@ -356,6 +366,14 @@ export const DiaryPage = memo(function DiaryPage({
                   />
                 )}
               </AnimatePresence>
+            </div>
+
+            {/* Photo Attachments */}
+            <div className="pl-12 pr-4 mb-4">
+              <DiaryImageAttachments
+                images={images}
+                onImagesChange={handleImagesChange}
+              />
             </div>
 
             {/* Writing Area */}
