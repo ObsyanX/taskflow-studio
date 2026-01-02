@@ -187,7 +187,7 @@ const Index = () => {
             <TaskForm onSubmit={handleAddTask} isExpanded={isFormExpanded} onToggleExpand={handleToggleForm} preselectedDate={preselectedDate} />
             <WeeklyAgendaView tasks={tasks} onTaskClick={handleEditTask} onAddTask={handleAddTaskFromCalendar} />
           </> : <>
-            <TaskForm onSubmit={handleAddTask} isExpanded={isFormExpanded} onToggleExpand={handleToggleForm} preselectedDate={preselectedDate} />
+            
             <CalendarView tasks={tasks} onTaskClick={handleEditTask} onAddTask={handleAddTaskFromCalendar} />
           </>}
 
