@@ -12,7 +12,6 @@ import { DiaryEditor } from './DiaryEditor';
 import { DiaryToolbar } from './DiaryToolbar';
 import { ReflectionPrompt } from './ReflectionPrompt';
 import { OnThisDay } from './OnThisDay';
-import { DiaryImageAttachments } from './DiaryImageAttachments';
 import { usePageFlipSound } from '@/hooks/usePageFlipSound';
 
 interface DiaryPageProps {
@@ -330,18 +329,20 @@ export const DiaryPage = memo(function DiaryPage({
             </div>
 
             {/* Mood Selector & Toolbar */}
-            <div className="mb-4 pl-12 pr-4 space-y-3">
+            <div className="mb-4 pl-12 pr-4 space-y-2">
               <MoodSelector
                 selectedMood={mood}
                 onSelect={handleMoodChange}
               />
               
-              {/* Font & Formatting Toolbar */}
+              {/* Combined Toolbar with Photos */}
               <DiaryToolbar
                 selectedFont={selectedFont}
                 fontSize={fontSize}
                 onFontChange={handleFontChange}
                 onFontSizeChange={handleFontSizeChange}
+                images={images}
+                onImagesChange={handleImagesChange}
               />
             </div>
 
@@ -366,14 +367,6 @@ export const DiaryPage = memo(function DiaryPage({
                   />
                 )}
               </AnimatePresence>
-            </div>
-
-            {/* Photo Attachments */}
-            <div className="pl-12 pr-4 mb-4">
-              <DiaryImageAttachments
-                images={images}
-                onImagesChange={handleImagesChange}
-              />
             </div>
 
             {/* Writing Area */}
