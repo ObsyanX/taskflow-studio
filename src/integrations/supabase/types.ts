@@ -14,6 +14,392 @@ export type Database = {
   }
   public: {
     Tables: {
+      goals: {
+        Row: {
+          created_at: string
+          deadline: string | null
+          description: string | null
+          id: string
+          is_archived: boolean | null
+          notes: string | null
+          priority: string
+          progress_percentage: number | null
+          sort_order: number | null
+          start_date: string
+          status: Database["public"]["Enums"]["goal_status"]
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          deadline?: string | null
+          description?: string | null
+          id?: string
+          is_archived?: boolean | null
+          notes?: string | null
+          priority?: string
+          progress_percentage?: number | null
+          sort_order?: number | null
+          start_date?: string
+          status?: Database["public"]["Enums"]["goal_status"]
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          deadline?: string | null
+          description?: string | null
+          id?: string
+          is_archived?: boolean | null
+          notes?: string | null
+          priority?: string
+          progress_percentage?: number | null
+          sort_order?: number | null
+          start_date?: string
+          status?: Database["public"]["Enums"]["goal_status"]
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      habit_categories: {
+        Row: {
+          color: string
+          created_at: string
+          icon: string | null
+          id: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          icon?: string | null
+          id?: string
+          name: string
+          user_id: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          icon?: string | null
+          id?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      habit_goal_links: {
+        Row: {
+          created_at: string
+          goal_id: string
+          habit_id: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          goal_id: string
+          habit_id: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          goal_id?: string
+          habit_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "habit_goal_links_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "habit_goal_links_habit_id_fkey"
+            columns: ["habit_id"]
+            isOneToOne: false
+            referencedRelation: "habits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      habit_logs: {
+        Row: {
+          completed: boolean | null
+          created_at: string
+          habit_id: string
+          id: string
+          log_date: string
+          notes: string | null
+          updated_at: string
+          user_id: string
+          value: number | null
+        }
+        Insert: {
+          completed?: boolean | null
+          created_at?: string
+          habit_id: string
+          id?: string
+          log_date: string
+          notes?: string | null
+          updated_at?: string
+          user_id: string
+          value?: number | null
+        }
+        Update: {
+          completed?: boolean | null
+          created_at?: string
+          habit_id?: string
+          id?: string
+          log_date?: string
+          notes?: string | null
+          updated_at?: string
+          user_id?: string
+          value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "habit_logs_habit_id_fkey"
+            columns: ["habit_id"]
+            isOneToOne: false
+            referencedRelation: "habits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      habit_streaks: {
+        Row: {
+          current_streak: number | null
+          habit_id: string
+          id: string
+          last_completed_date: string | null
+          longest_streak: number | null
+          streak_start_date: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          current_streak?: number | null
+          habit_id: string
+          id?: string
+          last_completed_date?: string | null
+          longest_streak?: number | null
+          streak_start_date?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          current_streak?: number | null
+          habit_id?: string
+          id?: string
+          last_completed_date?: string | null
+          longest_streak?: number | null
+          streak_start_date?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "habit_streaks_habit_id_fkey"
+            columns: ["habit_id"]
+            isOneToOne: true
+            referencedRelation: "habits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      habit_task_links: {
+        Row: {
+          created_at: string
+          habit_id: string
+          id: string
+          task_id: string
+        }
+        Insert: {
+          created_at?: string
+          habit_id: string
+          id?: string
+          task_id: string
+        }
+        Update: {
+          created_at?: string
+          habit_id?: string
+          id?: string
+          task_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "habit_task_links_habit_id_fkey"
+            columns: ["habit_id"]
+            isOneToOne: false
+            referencedRelation: "habits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "habit_task_links_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      habits: {
+        Row: {
+          category_id: string | null
+          created_at: string
+          custom_days: number[] | null
+          description: string | null
+          end_date: string | null
+          frequency: Database["public"]["Enums"]["habit_frequency"]
+          id: string
+          is_archived: boolean | null
+          notes: string | null
+          priority: string
+          sort_order: number | null
+          start_date: string
+          status: Database["public"]["Enums"]["habit_status"]
+          target_type: Database["public"]["Enums"]["habit_target_type"]
+          target_unit: string | null
+          target_value: number | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category_id?: string | null
+          created_at?: string
+          custom_days?: number[] | null
+          description?: string | null
+          end_date?: string | null
+          frequency?: Database["public"]["Enums"]["habit_frequency"]
+          id?: string
+          is_archived?: boolean | null
+          notes?: string | null
+          priority?: string
+          sort_order?: number | null
+          start_date?: string
+          status?: Database["public"]["Enums"]["habit_status"]
+          target_type?: Database["public"]["Enums"]["habit_target_type"]
+          target_unit?: string | null
+          target_value?: number | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category_id?: string | null
+          created_at?: string
+          custom_days?: number[] | null
+          description?: string | null
+          end_date?: string | null
+          frequency?: Database["public"]["Enums"]["habit_frequency"]
+          id?: string
+          is_archived?: boolean | null
+          notes?: string | null
+          priority?: string
+          sort_order?: number | null
+          start_date?: string
+          status?: Database["public"]["Enums"]["habit_status"]
+          target_type?: Database["public"]["Enums"]["habit_target_type"]
+          target_unit?: string | null
+          target_value?: number | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "habits_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "habit_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      milestones: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          goal_id: string
+          id: string
+          sort_order: number | null
+          status: Database["public"]["Enums"]["milestone_status"]
+          target_date: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          goal_id: string
+          id?: string
+          sort_order?: number | null
+          status?: Database["public"]["Enums"]["milestone_status"]
+          target_date?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          goal_id?: string
+          id?: string
+          sort_order?: number | null
+          status?: Database["public"]["Enums"]["milestone_status"]
+          target_date?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "milestones_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          email: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       tasks: {
         Row: {
           created_at: string
@@ -52,7 +438,11 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      goal_status: "not_started" | "in_progress" | "completed" | "overdue"
+      habit_frequency: "daily" | "weekly" | "custom"
+      habit_status: "pending" | "in_progress" | "completed" | "overdue"
+      habit_target_type: "yes_no" | "count" | "duration"
+      milestone_status: "pending" | "completed" | "overdue"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -179,6 +569,12 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      goal_status: ["not_started", "in_progress", "completed", "overdue"],
+      habit_frequency: ["daily", "weekly", "custom"],
+      habit_status: ["pending", "in_progress", "completed", "overdue"],
+      habit_target_type: ["yes_no", "count", "duration"],
+      milestone_status: ["pending", "completed", "overdue"],
+    },
   },
 } as const
