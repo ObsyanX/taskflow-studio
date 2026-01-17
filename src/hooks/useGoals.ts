@@ -4,15 +4,18 @@ import { Goal, Milestone, GoalStats } from '@/types/habits';
 import { useAuth } from './useAuth';
 import { toast } from 'sonner';
 
-export function useGoals() {
+export function useGoals(userId?: string) {
   const { user } = useAuth();
+  const effectiveUserId = userId || user?.id;
   const [goals, setGoals] = useState<Goal[]>([]);
+  const [milestones, setMilestones] = useState<Milestone[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Fetch all goals with milestones
   const fetchGoals = useCallback(async () => {
-    if (!user) {
+    if (!effectiveUserId) {
       setGoals([]);
+      setMilestones([]);
       setLoading(false);
       return;
     }
@@ -24,22 +27,25 @@ export function useGoals() {
         supabase
           .from('goals')
           .select('*')
-          .eq('user_id', user.id)
+          .eq('user_id', effectiveUserId)
           .eq('is_archived', false)
           .order('sort_order', { ascending: true }),
         supabase
           .from('milestones')
           .select('*')
-          .eq('user_id', user.id)
+          .eq('user_id', effectiveUserId)
           .order('sort_order', { ascending: true }),
       ]);
 
       if (goalsRes.error) throw goalsRes.error;
       if (milestonesRes.error) throw milestonesRes.error;
 
+      const allMilestones = milestonesRes.data || [];
+      setMilestones(allMilestones as Milestone[]);
+
       const goalsWithMilestones = (goalsRes.data || []).map(goal => ({
         ...goal,
-        milestones: milestonesRes.data?.filter(m => m.goal_id === goal.id) || [],
+        milestones: allMilestones.filter(m => m.goal_id === goal.id) || [],
       }));
 
       setGoals(goalsWithMilestones as Goal[]);
@@ -49,11 +55,11 @@ export function useGoals() {
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [effectiveUserId]);
 
   // Create goal
   const createGoal = useCallback(async (goalData: Partial<Goal>) => {
-    if (!user) return null;
+    if (!effectiveUserId) return null;
 
     try {
       const { data, error } = await supabase
@@ -65,7 +71,7 @@ export function useGoals() {
           start_date: goalData.start_date,
           deadline: goalData.deadline,
           notes: goalData.notes,
-          user_id: user.id,
+          user_id: effectiveUserId,
         })
         .select()
         .single();
@@ -86,18 +92,18 @@ export function useGoals() {
       toast.error('Failed to create goal');
       return null;
     }
-  }, [user]);
+  }, [effectiveUserId]);
 
   // Update goal
   const updateGoal = useCallback(async (id: string, updates: Partial<Goal>) => {
-    if (!user) return false;
+    if (!effectiveUserId) return false;
 
     try {
       const { error } = await supabase
         .from('goals')
         .update(updates)
         .eq('id', id)
-        .eq('user_id', user.id);
+        .eq('user_id', effectiveUserId);
 
       if (error) throw error;
       
@@ -109,18 +115,18 @@ export function useGoals() {
       toast.error('Failed to update goal');
       return false;
     }
-  }, [user]);
+  }, [effectiveUserId]);
 
   // Delete goal
   const deleteGoal = useCallback(async (id: string) => {
-    if (!user) return false;
+    if (!effectiveUserId) return false;
 
     try {
       const { error } = await supabase
         .from('goals')
         .delete()
         .eq('id', id)
-        .eq('user_id', user.id);
+        .eq('user_id', effectiveUserId);
 
       if (error) throw error;
       
@@ -132,30 +138,32 @@ export function useGoals() {
       toast.error('Failed to delete goal');
       return false;
     }
-  }, [user]);
+  }, [effectiveUserId]);
 
   // Create milestone
-  const createMilestone = useCallback(async (goalId: string, milestoneData: Partial<Milestone>) => {
-    if (!user) return null;
+  const createMilestone = useCallback(async (milestoneData: { goal_id: string; title: string; description?: string | null; target_date?: string | null }) => {
+    if (!effectiveUserId) return null;
 
     try {
       const { data, error } = await supabase
         .from('milestones')
         .insert({
-          title: milestoneData.title!,
+          title: milestoneData.title,
           description: milestoneData.description,
           target_date: milestoneData.target_date,
-          goal_id: goalId,
-          user_id: user.id,
+          goal_id: milestoneData.goal_id,
+          user_id: effectiveUserId,
         })
         .select()
         .single();
 
       if (error) throw error;
       
+      const newMilestone = data as Milestone;
+      setMilestones(prev => [...prev, newMilestone]);
       setGoals(prev => prev.map(g => {
-        if (g.id === goalId) {
-          return { ...g, milestones: [...(g.milestones || []), data] };
+        if (g.id === milestoneData.goal_id) {
+          return { ...g, milestones: [...(g.milestones || []), newMilestone] };
         }
         return g;
       }));
@@ -167,21 +175,22 @@ export function useGoals() {
       toast.error('Failed to create milestone');
       return null;
     }
-  }, [user]);
+  }, [effectiveUserId]);
 
   // Update milestone
   const updateMilestone = useCallback(async (id: string, updates: Partial<Milestone>) => {
-    if (!user) return false;
+    if (!effectiveUserId) return false;
 
     try {
       const { error } = await supabase
         .from('milestones')
         .update(updates)
         .eq('id', id)
-        .eq('user_id', user.id);
+        .eq('user_id', effectiveUserId);
 
       if (error) throw error;
       
+      setMilestones(prev => prev.map(m => m.id === id ? { ...m, ...updates } : m));
       setGoals(prev => prev.map(g => ({
         ...g,
         milestones: g.milestones?.map(m => m.id === id ? { ...m, ...updates } : m),
@@ -203,21 +212,22 @@ export function useGoals() {
       toast.error('Failed to update milestone');
       return false;
     }
-  }, [user, goals, updateGoal]);
+  }, [effectiveUserId, goals, updateGoal]);
 
   // Delete milestone
   const deleteMilestone = useCallback(async (id: string) => {
-    if (!user) return false;
+    if (!effectiveUserId) return false;
 
     try {
       const { error } = await supabase
         .from('milestones')
         .delete()
         .eq('id', id)
-        .eq('user_id', user.id);
+        .eq('user_id', effectiveUserId);
 
       if (error) throw error;
       
+      setMilestones(prev => prev.filter(m => m.id !== id));
       setGoals(prev => prev.map(g => ({
         ...g,
         milestones: g.milestones?.filter(m => m.id !== id),
@@ -230,7 +240,7 @@ export function useGoals() {
       toast.error('Failed to delete milestone');
       return false;
     }
-  }, [user]);
+  }, [effectiveUserId]);
 
   // Calculate stats
   const stats = useMemo((): GoalStats => {
@@ -261,7 +271,9 @@ export function useGoals() {
 
   return {
     goals,
+    milestones,
     loading,
+    isLoading: loading,
     stats,
     fetchGoals,
     createGoal,
