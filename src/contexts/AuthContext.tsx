@@ -31,3 +31,6 @@ export function useAuthContext() {
   }
   return context;
 }
+
+// Alias for convenience - can be used in components that are wrapped in AuthProvider
+export { useAuthContext as useAuth };

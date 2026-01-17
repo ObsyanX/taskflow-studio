@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      diary_entries: {
+        Row: {
+          created_at: string
+          encrypted_content: string
+          entry_date: string
+          id: string
+          iv: string
+          mood: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          encrypted_content: string
+          entry_date: string
+          id?: string
+          iv: string
+          mood?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          encrypted_content?: string
+          entry_date?: string
+          id?: string
+          iv?: string
+          mood?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       goals: {
         Row: {
           created_at: string
@@ -427,6 +460,45 @@ export type Database = {
           id?: string
           priority?: string
           title?: string
+        }
+        Relationships: []
+      }
+      user_settings: {
+        Row: {
+          created_at: string
+          diary_auto_lock_minutes: number | null
+          diary_bookmarked_date: string | null
+          diary_last_opened_date: string | null
+          diary_pin_hash: string | null
+          diary_salt: string | null
+          id: string
+          theme: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          diary_auto_lock_minutes?: number | null
+          diary_bookmarked_date?: string | null
+          diary_last_opened_date?: string | null
+          diary_pin_hash?: string | null
+          diary_salt?: string | null
+          id?: string
+          theme?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          diary_auto_lock_minutes?: number | null
+          diary_bookmarked_date?: string | null
+          diary_last_opened_date?: string | null
+          diary_pin_hash?: string | null
+          diary_salt?: string | null
+          id?: string
+          theme?: string | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
