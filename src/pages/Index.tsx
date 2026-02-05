@@ -185,6 +185,12 @@ const Index = () => {
           <DiaryView />
         ) : viewMode === 'list' ? (
           <>
+            <TaskForm
+              onSubmit={handleAddTask}
+              isExpanded={isFormExpanded}
+              onToggleExpand={handleToggleForm}
+              preselectedDate={preselectedDate}
+            />
             <FilterBar
               filter={filter}
               onFilterChange={setFilter}
@@ -205,12 +211,6 @@ const Index = () => {
           </>
         ) : viewMode === 'weekly' ? (
           <>
-            <TaskForm
-              onSubmit={handleAddTask}
-              isExpanded={isFormExpanded}
-              onToggleExpand={handleToggleForm}
-              preselectedDate={preselectedDate}
-            />
             <WeeklyAgendaView
               tasks={tasks}
               onTaskClick={handleEditTask}
