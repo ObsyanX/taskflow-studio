@@ -1,25 +1,26 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Target, 
-  Plus, 
-  Calendar, 
-  CheckCircle2, 
-  Clock, 
-  AlertCircle,
-  ChevronDown,
-  ChevronRight,
-  Trash2,
-  Edit2,
-  Flag
-} from 'lucide-react';
-import { format, differenceInDays, isPast, isToday } from 'date-fns';
+ import React, { useState, useCallback } from 'react';
+ 
+ import {
+   DndContext,
+   closestCenter,
+   KeyboardSensor,
+   PointerSensor,
+   useSensor,
+   useSensors,
+   DragEndEvent,
+ } from '@dnd-kit/core';
+ import {
+   arrayMove,
+   SortableContext,
+   sortableKeyboardCoordinates,
+   verticalListSortingStrategy,
+ } from '@dnd-kit/sortable';
+ import { Target, Plus, CheckCircle2, Clock, AlertCircle, Flag } from 'lucide-react';
+ import { isPast } from 'date-fns';
 import { useGoals } from '@/hooks/useGoals';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
+ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -37,35 +38,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
-import { cn } from '@/lib/utils';
+ import { DraggableGoalCard } from '@/components/goals/DraggableGoalCard';
 import { MainLayout } from '@/components/layout/MainLayout';
-import type { Goal, Milestone } from '@/types/habits';
+ import type { Goal } from '@/types/habits';
 
-const priorityColors = {
-  high: 'bg-red-500/10 text-red-500 border-red-500/20',
-  medium: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20',
-  low: 'bg-green-500/10 text-green-500 border-green-500/20',
-};
-
-const statusColors = {
-  not_started: 'bg-muted text-muted-foreground',
-  in_progress: 'bg-blue-500/10 text-blue-500',
-  completed: 'bg-green-500/10 text-green-500',
-  overdue: 'bg-red-500/10 text-red-500',
-};
-
-const statusLabels = {
-  not_started: 'Not Started',
-  in_progress: 'In Progress',
-  completed: 'Completed',
-  overdue: 'Overdue',
-};
-
+ 
 export default function Goals() {
   const { user } = useAuth();
   const { 
@@ -80,11 +57,40 @@ export default function Goals() {
     deleteMilestone
   } = useGoals(user?.id);
 
+   const sensors = useSensors(
+     useSensor(PointerSensor),
+     useSensor(KeyboardSensor, {
+       coordinateGetter: sortableKeyboardCoordinates,
+     })
+   );
+ 
   const [isGoalDialogOpen, setIsGoalDialogOpen] = useState(false);
   const [isMilestoneDialogOpen, setIsMilestoneDialogOpen] = useState(false);
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
   const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
   const [expandedGoals, setExpandedGoals] = useState<Set<string>>(new Set());
+   
+   // Handle goal reordering
+   const handleDragEnd = useCallback(async (event: DragEndEvent) => {
+     const { active, over } = event;
+     
+     if (over && active.id !== over.id) {
+       const oldIndex = goals.findIndex(g => g.id === active.id);
+       const newIndex = goals.findIndex(g => g.id === over.id);
+       
+       if (oldIndex !== -1 && newIndex !== -1) {
+         const newGoals = arrayMove(goals, oldIndex, newIndex);
+         
+         // Update sort_order for each goal
+         for (let i = 0; i < newGoals.length; i++) {
+           const goal = newGoals[i];
+           if (goal.sort_order !== i) {
+             await updateGoal(goal.id, { sort_order: i });
+           }
+         }
+       }
+     }
+   }, [goals, updateGoal]);
   
   // Form state
   const [goalForm, setGoalForm] = useState({
@@ -183,12 +189,7 @@ export default function Goals() {
     return Math.round((completed / goalMilestones.length) * 100);
   };
 
-  const getDaysRemaining = (deadline: string | null) => {
-    if (!deadline) return null;
-    const days = differenceInDays(new Date(deadline), new Date());
-    return days;
-  };
-
+   
   // Stats
   const activeGoals = goals.filter(g => g.status !== 'completed').length;
   const completedGoals = goals.filter(g => g.status === 'completed').length;
@@ -270,156 +271,39 @@ export default function Goals() {
 
         {/* Goals List */}
         <div className="space-y-4">
-          <AnimatePresence>
-            {goals.map((goal) => {
-              const progress = calculateProgress(goal.id);
-              const daysRemaining = getDaysRemaining(goal.deadline);
-              const goalMilestones = getGoalMilestones(goal.id);
-              const isExpanded = expandedGoals.has(goal.id);
-
-              return (
-                <motion.div
-                  key={goal.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                >
-                  <Card className="overflow-hidden">
-                    <Collapsible open={isExpanded} onOpenChange={() => toggleGoalExpand(goal.id)}>
-                      <CardHeader className="pb-3">
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex items-start gap-3 flex-1">
-                            <CollapsibleTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0 mt-0.5">
-                                {isExpanded ? (
-                                  <ChevronDown className="h-4 w-4" />
-                                ) : (
-                                  <ChevronRight className="h-4 w-4" />
-                                )}
-                              </Button>
-                            </CollapsibleTrigger>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <CardTitle className="text-lg">{goal.title}</CardTitle>
-                                <Badge variant="outline" className={priorityColors[goal.priority]}>
-                                  {goal.priority}
-                                </Badge>
-                                <Badge className={statusColors[goal.status]}>
-                                  {statusLabels[goal.status]}
-                                </Badge>
-                              </div>
-                              {goal.description && (
-                                <p className="text-sm text-muted-foreground mt-1">{goal.description}</p>
-                              )}
-                              <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
-                                {goal.deadline && (
-                                  <div className="flex items-center gap-1">
-                                    <Calendar className="h-3.5 w-3.5" />
-                                    <span>{format(new Date(goal.deadline), 'MMM d, yyyy')}</span>
-                                    {daysRemaining !== null && (
-                                      <span className={cn(
-                                        'ml-1',
-                                        daysRemaining < 0 ? 'text-red-500' : daysRemaining <= 7 ? 'text-yellow-500' : ''
-                                      )}>
-                                        ({daysRemaining < 0 ? `${Math.abs(daysRemaining)}d overdue` : `${daysRemaining}d left`})
-                                      </span>
-                                    )}
-                                  </div>
-                                )}
-                                <span>{goalMilestones.length} milestones</span>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2 shrink-0">
-                            <Button variant="ghost" size="icon" onClick={() => openEditGoal(goal)}>
-                              <Edit2 className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="icon" onClick={() => deleteGoal(goal.id)}>
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
-                          </div>
-                        </div>
-                        <div className="mt-4 pl-9">
-                          <div className="flex items-center gap-2">
-                            <Progress value={progress} className="flex-1 h-2" />
-                            <span className="text-sm font-medium w-10 text-right">{progress}%</span>
-                          </div>
-                        </div>
-                      </CardHeader>
-                      
-                      <CollapsibleContent>
-                        <CardContent className="pt-0 pl-12">
-                          <div className="border-t border-border pt-4">
-                            <div className="flex items-center justify-between mb-3">
-                              <h4 className="text-sm font-medium">Milestones</h4>
-                              <Button variant="outline" size="sm" onClick={() => openAddMilestone(goal.id)}>
-                                <Plus className="h-3 w-3 mr-1" />
-                                Add
-                              </Button>
-                            </div>
-                            
-                            {goalMilestones.length === 0 ? (
-                              <p className="text-sm text-muted-foreground py-4 text-center">
-                                No milestones yet. Add milestones to track progress.
-                              </p>
-                            ) : (
-                              <div className="space-y-2">
-                                {goalMilestones.map((milestone) => (
-                                  <div
-                                    key={milestone.id}
-                                    className={cn(
-                                      'flex items-center gap-3 p-3 rounded-lg border',
-                                      milestone.status === 'completed' ? 'bg-green-500/5 border-green-500/20' : 'bg-muted/50'
-                                    )}
-                                  >
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-6 w-6 shrink-0"
-                                      onClick={() => updateMilestone(milestone.id, {
-                                        status: milestone.status === 'completed' ? 'pending' : 'completed',
-                                        completed_at: milestone.status === 'completed' ? null : new Date().toISOString()
-                                      })}
-                                    >
-                                      <CheckCircle2 className={cn(
-                                        'h-4 w-4',
-                                        milestone.status === 'completed' ? 'text-green-500' : 'text-muted-foreground'
-                                      )} />
-                                    </Button>
-                                    <div className="flex-1 min-w-0">
-                                      <p className={cn(
-                                        'text-sm font-medium',
-                                        milestone.status === 'completed' && 'line-through text-muted-foreground'
-                                      )}>
-                                        {milestone.title}
-                                      </p>
-                                      {milestone.target_date && (
-                                        <p className="text-xs text-muted-foreground">
-                                          Due: {format(new Date(milestone.target_date), 'MMM d, yyyy')}
-                                        </p>
-                                      )}
-                                    </div>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-6 w-6 shrink-0"
-                                      onClick={() => deleteMilestone(milestone.id)}
-                                    >
-                                      <Trash2 className="h-3 w-3 text-destructive" />
-                                    </Button>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        </CardContent>
-                      </CollapsibleContent>
-                    </Collapsible>
-                  </Card>
-                </motion.div>
-              );
-            })}
-          </AnimatePresence>
+           <DndContext
+             sensors={sensors}
+             collisionDetection={closestCenter}
+             onDragEnd={handleDragEnd}
+           >
+             <SortableContext
+               items={goals.map(g => g.id)}
+               strategy={verticalListSortingStrategy}
+             >
+               {goals.map((goal) => {
+                 const goalMilestones = getGoalMilestones(goal.id);
+                 const isExpanded = expandedGoals.has(goal.id);
+ 
+                 return (
+                   <DraggableGoalCard
+                     key={goal.id}
+                     goal={goal}
+                     milestones={goalMilestones}
+                     isExpanded={isExpanded}
+                     onToggleExpand={() => toggleGoalExpand(goal.id)}
+                     onEdit={() => openEditGoal(goal)}
+                     onDelete={() => deleteGoal(goal.id)}
+                     onAddMilestone={() => openAddMilestone(goal.id)}
+                     onToggleMilestone={(milestone) => updateMilestone(milestone.id, {
+                       status: milestone.status === 'completed' ? 'pending' : 'completed',
+                       completed_at: milestone.status === 'completed' ? null : new Date().toISOString()
+                     })}
+                     onDeleteMilestone={(milestoneId) => deleteMilestone(milestoneId)}
+                   />
+                 );
+               })}
+             </SortableContext>
+           </DndContext>
 
           {goals.length === 0 && !isLoading && (
             <Card className="p-12">

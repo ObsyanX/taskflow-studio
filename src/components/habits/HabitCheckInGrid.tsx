@@ -1,22 +1,30 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+ import React, { useState, useMemo, useCallback } from 'react';
+ import {
+   DndContext,
+   closestCenter,
+   KeyboardSensor,
+   PointerSensor,
+   useSensor,
+   useSensors,
+   DragEndEvent,
+ } from '@dnd-kit/core';
+ import {
+   arrayMove,
+   SortableContext,
+   sortableKeyboardCoordinates,
+   verticalListSortingStrategy,
+ } from '@dnd-kit/sortable';
 import { 
   ChevronLeft, 
   ChevronRight, 
-  Check, 
-  X, 
-  Flame,
   Target,
-  Plus,
-  MoreVertical,
-  Edit,
-  Trash2
+   Plus
 } from 'lucide-react';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths, getWeek, startOfWeek, endOfWeek, isWithinInterval, parseISO } from 'date-fns';
+ import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths, getWeek } from 'date-fns';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+ import { Progress } from '@/components/ui/progress';
+ import { TooltipProvider } from '@/components/ui/tooltip';
+ import { DraggableHabitRow } from './DraggableHabitRow';
 import { cn } from '@/lib/utils';
 import { Habit, HabitLog } from '@/types/habits';
 
@@ -28,19 +36,27 @@ interface HabitCheckInGridProps {
   onEditHabit: (habit: Habit) => void;
   onDeleteHabit: (habitId: string) => void;
   onAddHabit: () => void;
+   onReorderHabits?: (habitIds: string[]) => void;
 }
 
 export function HabitCheckInGrid({
   habits,
   logs,
   onToggleLog,
-  onUpdateLogValue,
+   onUpdateLogValue: _,
   onEditHabit,
   onDeleteHabit,
   onAddHabit,
+   onReorderHabits,
 }: HabitCheckInGridProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+ 
+   const sensors = useSensors(
+     useSensor(PointerSensor),
+     useSensor(KeyboardSensor, {
+       coordinateGetter: sortableKeyboardCoordinates,
+     })
+   );
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
@@ -62,13 +78,9 @@ export function HabitCheckInGrid({
     }));
   }, [days]);
 
-  const getLogForHabitAndDate = (habitId: string, date: Date): HabitLog | undefined => {
-    const dateStr = format(date, 'yyyy-MM-dd');
-    return logs.find(l => l.habit_id === habitId && l.log_date === dateStr);
-  };
-
   const getCompletionStatus = (habitId: string, date: Date) => {
-    const log = getLogForHabitAndDate(habitId, date);
+     const dateStr = format(date, 'yyyy-MM-dd');
+     const log = logs.find(l => l.habit_id === habitId && l.log_date === dateStr);
     const habit = habits.find(h => h.id === habitId);
     
     if (!log) return 'empty';
@@ -97,7 +109,7 @@ export function HabitCheckInGrid({
   };
 
   const calculateHabitStats = (habitId: string) => {
-    const habitLogs = logs.filter(l => l.habit_id === habitId);
+     const habitLogs = logs.filter(l => l.habit_id === habitId && days.some(d => format(d, 'yyyy-MM-dd') === l.log_date));
     const completed = habitLogs.filter(l => l.completed).length;
     const total = days.length;
     const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
@@ -123,10 +135,29 @@ export function HabitCheckInGrid({
 
   const totalStats = calculateTotalStats();
 
+   const handleDragEnd = useCallback((event: DragEndEvent) => {
+     const { active, over } = event;
+     
+     if (over && active.id !== over.id && onReorderHabits) {
+       const oldIndex = habits.findIndex(h => h.id === active.id);
+       const newIndex = habits.findIndex(h => h.id === over.id);
+       
+       if (oldIndex !== -1 && newIndex !== -1) {
+         const newOrder = arrayMove(habits, oldIndex, newIndex).map(h => h.id);
+         onReorderHabits(newOrder);
+       }
+     }
+   }, [habits, onReorderHabits]);
+ 
   return (
     <TooltipProvider>
       <div className="bg-card rounded-2xl border border-border/50 overflow-hidden">
-        {/* Header */}
+         <DndContext
+           sensors={sensors}
+           collisionDetection={closestCenter}
+           onDragEnd={handleDragEnd}
+         >
+           {/* Header */}
         <div className="p-4 border-b border-border/50 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button
@@ -154,8 +185,8 @@ export function HabitCheckInGrid({
           </Button>
         </div>
 
-        {/* Grid Container */}
-        <div className="overflow-x-auto">
+           {/* Grid Container */}
+           <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             {/* Week Headers */}
             <thead>
@@ -203,127 +234,29 @@ export function HabitCheckInGrid({
               </tr>
             </thead>
 
-            <tbody>
-              {habits.map((habit, index) => {
-                const stats = calculateHabitStats(habit.id);
-                const streak = habit.streak?.current_streak || 0;
-
-                return (
-                  <motion.tr
-                    key={habit.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    className="border-t border-border/30 hover:bg-muted/10"
-                  >
-                    {/* Habit Name */}
-                    <td className="sticky left-0 bg-card z-10 px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="w-3 h-3 rounded-full"
-                          style={{ backgroundColor: habit.category?.color || '#6366f1' }}
-                        />
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-foreground truncate">
-                            {habit.title}
-                          </p>
-                          {habit.target_type !== 'yes_no' && (
-                            <p className="text-xs text-muted-foreground">
-                              Target: {habit.target_value} {habit.target_unit || 'times'}
-                            </p>
-                          )}
-                        </div>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <MoreVertical className="w-4 h-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => onEditHabit(habit)}>
-                              <Edit className="w-4 h-4 mr-2" />
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => onDeleteHabit(habit.id)}
-                              className="text-destructive"
-                            >
-                              <Trash2 className="w-4 h-4 mr-2" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </td>
-
-                    {/* Streak */}
-                    <td className="px-2 py-3 text-center">
-                      <div className="flex items-center justify-center gap-1">
-                        <Flame className={cn(
-                          "w-4 h-4",
-                          streak > 0 ? "text-orange-500" : "text-muted-foreground"
-                        )} />
-                        <span className={cn(
-                          "text-sm font-medium",
-                          streak > 0 ? "text-orange-500" : "text-muted-foreground"
-                        )}>
-                          {streak}
-                        </span>
-                      </div>
-                    </td>
-
-                    {/* Progress */}
-                    <td className="px-2 py-3">
-                      <div className="flex items-center gap-2">
-                        <Progress value={stats.percentage} className="h-2 flex-1" />
-                        <span className="text-xs font-medium text-muted-foreground w-10 text-right">
-                          {stats.percentage}%
-                        </span>
-                      </div>
-                    </td>
-
-                    {/* Day Cells */}
-                    {days.map(day => {
-                      const status = getCompletionStatus(habit.id, day);
-                      const log = getLogForHabitAndDate(habit.id, day);
-                      const isToday = isSameDay(day, new Date());
-
-                      return (
-                        <td key={day.toISOString()} className="px-0.5 py-2">
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <button
-                                onClick={() => onToggleLog(habit.id, day)}
-                                className={cn(
-                                  "w-7 h-7 rounded-md flex items-center justify-center transition-all",
-                                  getCellColor(status),
-                                  isToday && "ring-2 ring-primary ring-offset-1 ring-offset-background"
-                                )}
-                              >
-                                {status === 'completed' && (
-                                  <Check className="w-4 h-4 text-white" />
-                                )}
-                                {status === 'partial' && (
-                                  <span className="text-xs text-white font-medium">
-                                    {log?.value}
-                                  </span>
-                                )}
-                                {status === 'missed' && (
-                                  <X className="w-3 h-3 text-white" />
-                                )}
-                              </button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>{format(day, 'MMM d, yyyy')}</p>
-                              {log?.notes && <p className="text-xs">{log.notes}</p>}
-                            </TooltipContent>
-                          </Tooltip>
-                        </td>
-                      );
-                    })}
-                  </motion.tr>
-                );
-              })}
+               <tbody>
+                 <SortableContext
+                   items={habits.map(h => h.id)}
+                   strategy={verticalListSortingStrategy}
+                 >
+                   {habits.map((habit) => {
+                     const stats = calculateHabitStats(habit.id);
+                     return (
+                       <DraggableHabitRow
+                         key={habit.id}
+                         habit={habit}
+                         days={days}
+                         logs={logs}
+                         stats={stats}
+                         onToggleLog={onToggleLog}
+                         onEditHabit={onEditHabit}
+                         onDeleteHabit={onDeleteHabit}
+                         getCompletionStatus={getCompletionStatus}
+                         getCellColor={getCellColor}
+                       />
+                     );
+                   })}
+                 </SortableContext>
 
               {/* Summary Row */}
               {habits.length > 0 && (
@@ -368,7 +301,8 @@ export function HabitCheckInGrid({
             </tbody>
           </table>
         </div>
-
+         </DndContext>
+          
         {/* Empty State */}
         {habits.length === 0 && (
           <div className="p-12 text-center">
