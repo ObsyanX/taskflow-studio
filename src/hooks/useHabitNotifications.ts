@@ -40,7 +40,7 @@
    }, []);
  
    // Show browser notification
-   const showNotification = useCallback((title: string, body: string, tag: string) => {
+   const showNotification = useCallback(async (title: string, body: string, tag: string) => {
      if (permissionRef.current !== 'granted') return;
  
      const notification = new Notification(title, {
@@ -50,14 +50,13 @@
        requireInteraction: false,
      });
  
-     // Play sound
-     try {
-       const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2teleS0TKZjJ3r1+RicIMX7M4shxNRQAIXbF4chpLwz/GWvD5cZiKAb/EVjB582VVBsC/wdLwuvTj1UaAP8AQ8Tw14lQFf7+PsT03oRLEPz8OcX35n9GC/r5NMn66XpBBvf2McwAAHY8Avb0LtEDAXI3APTzK9UGBm8yAO/wKNkJCmoqAO/uJN0NCmYjAO7sH+AQDGIdAOzpG+MTDl0WAOrmFuUWEFkQAOfiEugZEVQJAOTeCusaEU8D/+DbB+4bEEoA/93XA/EcD0YA/NrRAPQeD0L+99nNAPchDz/89tXKAPslDjz67tfH/fkoDTO379bF+/wrDDD039bE+f8vDC3u49fD+P8yDCrq5trC9gA2DCfm6t3B8gA6DSPi7+C/7gE+DyDe8+K97AFBEBzb9+W76gNFEhnY+ui55gRJFBbV/eu24QZMFhTT/u6z3gZPGRHS/fCw2gdSGw/Q/PKu1ghVHQ7O+vSr0wdYHwzN+fas0AdaIAvL9/mq0AZdIgvK9fqp0AVfJArJ9Pyn0QNZJQ==');
-       audio.volume = 0.3;
-       audio.play().catch(() => {});
-     } catch {
-       // Audio not supported
-     }
+    // Play selected notification sound
+    try {
+      const { playSound } = await import('@/components/habits/NotificationSoundPicker');
+      playSound();
+    } catch {
+      // Audio not supported
+    }
  
      notification.onclick = () => {
        window.focus();
