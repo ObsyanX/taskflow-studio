@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Habit, HabitLog, HabitCategory, HabitStreak, HabitStats } from '@/types/habits';
-import { useAuth } from './useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { format, startOfDay, endOfDay, eachDayOfInterval, isWithinInterval, parseISO } from 'date-fns';
 

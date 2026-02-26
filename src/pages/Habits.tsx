@@ -61,15 +61,22 @@ import { Habit } from '@/types/habits';
  
    const habitsNeedingAttention = getHabitsNeedingAttention();
    
-   const handleEnableNotifications = async () => {
-     const granted = await requestPermission();
-     setNotificationsEnabled(granted);
-     if (granted) {
-       toast.success('Notifications enabled! You\'ll receive streak break alerts.');
-     } else {
-       toast.error('Notification permission denied.');
-     }
-   };
+    const handleEnableNotifications = async () => {
+      if (!('Notification' in window)) {
+        toast.info('Notifications are not supported in this browser. Alerts will show as in-app toasts.');
+        setNotificationsEnabled(true);
+        return;
+      }
+      const granted = await requestPermission();
+      setNotificationsEnabled(granted);
+      if (granted) {
+        toast.success('Notifications enabled! You\'ll receive streak break alerts.');
+      } else {
+        // Still enable in-app toast alerts even if browser notifications are denied
+        setNotificationsEnabled(true);
+        toast.info('Browser notifications denied, but in-app alerts are enabled.');
+      }
+    };
  
    // Fetch logs for a wider range to support reports
    useEffect(() => {
