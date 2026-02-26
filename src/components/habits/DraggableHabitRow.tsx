@@ -3,14 +3,16 @@
  import { CSS } from '@dnd-kit/utilities';
  
  import { 
-   Check, 
-   X, 
-   Flame,
-   MoreVertical,
-   Edit,
-   Trash2,
-   GripVertical
- } from 'lucide-react';
+    Check, 
+    X, 
+    Flame,
+    MoreVertical,
+    Edit,
+    Trash2,
+    GripVertical,
+    Archive,
+    ArchiveRestore
+  } from 'lucide-react';
  import { format, isSameDay } from 'date-fns';
  import { Button } from '@/components/ui/button';
  import { Progress } from '@/components/ui/progress';
@@ -25,8 +27,9 @@
    logs: HabitLog[];
    stats: { completed: number; total: number; percentage: number };
    onToggleLog: (habitId: string, date: Date) => void;
-   onEditHabit: (habit: Habit) => void;
-   onDeleteHabit: (habitId: string) => void;
+    onEditHabit: (habit: Habit) => void;
+    onDeleteHabit: (habitId: string) => void;
+    onArchiveHabit?: (habitId: string, archive: boolean) => void;
    getCompletionStatus: (habitId: string, date: Date) => string;
    getCellColor: (status: string) => string;
  }
@@ -36,9 +39,10 @@
    days,
    logs,
    stats,
-   onToggleLog,
-   onEditHabit,
-   onDeleteHabit,
+    onToggleLog,
+    onEditHabit,
+    onDeleteHabit,
+    onArchiveHabit,
    getCompletionStatus,
    getCellColor,
  }: DraggableHabitRowProps) {
@@ -104,17 +108,26 @@
                </Button>
              </DropdownMenuTrigger>
              <DropdownMenuContent align="end">
-               <DropdownMenuItem onClick={() => onEditHabit(habit)}>
-                 <Edit className="w-4 h-4 mr-2" />
-                 Edit
-               </DropdownMenuItem>
-               <DropdownMenuItem
-                 onClick={() => onDeleteHabit(habit.id)}
-                 className="text-destructive"
-               >
-                 <Trash2 className="w-4 h-4 mr-2" />
-                 Delete
-               </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onEditHabit(habit)}>
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit
+                </DropdownMenuItem>
+                {onArchiveHabit && (
+                  <DropdownMenuItem onClick={() => onArchiveHabit(habit.id, !habit.is_archived)}>
+                    {habit.is_archived ? (
+                      <><ArchiveRestore className="w-4 h-4 mr-2" /> Unarchive</>
+                    ) : (
+                      <><Archive className="w-4 h-4 mr-2" /> Archive</>
+                    )}
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem
+                  onClick={() => onDeleteHabit(habit.id)}
+                  className="text-destructive"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete
+                </DropdownMenuItem>
              </DropdownMenuContent>
            </DropdownMenu>
          </div>
