@@ -8,6 +8,7 @@ import { format } from 'date-fns';
 export function useHabits() {
   const { user } = useAuth();
   const [habits, setHabits] = useState<Habit[]>([]);
+  const [archivedHabits, setArchivedHabits] = useState<Habit[]>([]);
   const [categories, setCategories] = useState<HabitCategory[]>([]);
   const [logs, setLogs] = useState<HabitLog[]>([]);
   const [streaks, setStreaks] = useState<HabitStreak[]>([]);
@@ -24,13 +25,19 @@ export function useHabits() {
     try {
       setLoading(true);
       
-      const [habitsRes, categoriesRes, streaksRes] = await Promise.all([
+      const [habitsRes, archivedRes, categoriesRes, streaksRes] = await Promise.all([
         supabase
           .from('habits')
           .select('*')
           .eq('user_id', user.id)
           .eq('is_archived', false)
           .order('sort_order', { ascending: true }),
+        supabase
+          .from('habits')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('is_archived', true)
+          .order('title', { ascending: true }),
         supabase
           .from('habit_categories')
           .select('*')
@@ -42,17 +49,18 @@ export function useHabits() {
       ]);
 
       if (habitsRes.error) throw habitsRes.error;
+      if (archivedRes.error) throw archivedRes.error;
       if (categoriesRes.error) throw categoriesRes.error;
       if (streaksRes.error) throw streaksRes.error;
 
-      // Map habits with their categories and streaks
-      const habitsWithData = (habitsRes.data || []).map(habit => ({
+      const mapHabits = (list: any[]) => list.map(habit => ({
         ...habit,
         category: categoriesRes.data?.find(c => c.id === habit.category_id),
         streak: streaksRes.data?.find(s => s.habit_id === habit.id),
       }));
 
-      setHabits(habitsWithData as Habit[]);
+      setHabits(mapHabits(habitsRes.data || []) as Habit[]);
+      setArchivedHabits(mapHabits(archivedRes.data || []) as Habit[]);
       setCategories(categoriesRes.data || []);
       setStreaks(streaksRes.data || []);
     } catch (error: any) {
@@ -164,6 +172,29 @@ export function useHabits() {
       return false;
     }
   }, [user]);
+
+  // Archive/unarchive habit
+  const archiveHabit = useCallback(async (id: string, archive: boolean) => {
+    if (!user) return false;
+
+    try {
+      const { error } = await supabase
+        .from('habits')
+        .update({ is_archived: archive })
+        .eq('id', id)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+      
+      await fetchHabits();
+      toast.success(archive ? 'Habit archived' : 'Habit unarchived');
+      return true;
+    } catch (error: any) {
+      console.error('Error archiving habit:', error);
+      toast.error('Failed to archive habit');
+      return false;
+    }
+  }, [user, fetchHabits]);
 
   // Toggle habit log for a specific date
   const toggleHabitLog = useCallback(async (habitId: string, date: Date, value?: number) => {
@@ -340,6 +371,7 @@ export function useHabits() {
 
   return {
     habits,
+    archivedHabits,
     categories,
     logs,
     streaks,
@@ -350,6 +382,7 @@ export function useHabits() {
     createHabit,
     updateHabit,
     deleteHabit,
+    archiveHabit,
     toggleHabitLog,
     updateLogValue,
     createCategory,

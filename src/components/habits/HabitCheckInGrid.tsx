@@ -18,7 +18,8 @@ import {
   ChevronLeft, 
   ChevronRight, 
   Target,
-   Plus
+  Plus,
+  Archive
 } from 'lucide-react';
  import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths, getWeek } from 'date-fns';
 import { Button } from '@/components/ui/button';
@@ -30,17 +31,20 @@ import { Habit, HabitLog } from '@/types/habits';
 
 interface HabitCheckInGridProps {
   habits: Habit[];
+  archivedHabits?: Habit[];
   logs: HabitLog[];
   onToggleLog: (habitId: string, date: Date, value?: number) => void;
   onUpdateLogValue: (habitId: string, date: Date, value: number) => void;
   onEditHabit: (habit: Habit) => void;
   onDeleteHabit: (habitId: string) => void;
   onAddHabit: () => void;
-   onReorderHabits?: (habitIds: string[]) => void;
+  onReorderHabits?: (habitIds: string[]) => void;
+  onArchiveHabit?: (habitId: string, archive: boolean) => void;
 }
 
 export function HabitCheckInGrid({
   habits,
+  archivedHabits = [],
   logs,
   onToggleLog,
    onUpdateLogValue: _,
@@ -48,8 +52,10 @@ export function HabitCheckInGrid({
   onDeleteHabit,
   onAddHabit,
    onReorderHabits,
+   onArchiveHabit,
 }: HabitCheckInGridProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [showArchived, setShowArchived] = useState(false);
  
    const sensors = useSensors(
      useSensor(PointerSensor),
@@ -242,21 +248,22 @@ export function HabitCheckInGrid({
                    {habits.map((habit) => {
                      const stats = calculateHabitStats(habit.id);
                      return (
-                       <DraggableHabitRow
-                         key={habit.id}
-                         habit={habit}
-                         days={days}
-                         logs={logs}
-                         stats={stats}
-                         onToggleLog={onToggleLog}
-                         onEditHabit={onEditHabit}
-                         onDeleteHabit={onDeleteHabit}
-                         getCompletionStatus={getCompletionStatus}
-                         getCellColor={getCellColor}
-                       />
-                     );
-                   })}
-                 </SortableContext>
+                        <DraggableHabitRow
+                          key={habit.id}
+                          habit={habit}
+                          days={days}
+                          logs={logs}
+                          stats={stats}
+                          onToggleLog={onToggleLog}
+                          onEditHabit={onEditHabit}
+                          onDeleteHabit={onDeleteHabit}
+                          onArchiveHabit={onArchiveHabit}
+                          getCompletionStatus={getCompletionStatus}
+                          getCellColor={getCellColor}
+                        />
+                      );
+                    })}
+                  </SortableContext>
 
               {/* Summary Row */}
               {habits.length > 0 && (
@@ -337,6 +344,48 @@ export function HabitCheckInGrid({
               <div className="w-4 h-4 rounded bg-muted" />
               <span className="text-muted-foreground">Not tracked</span>
             </div>
+          </div>
+        )}
+
+        {/* Archived Habits Section */}
+        {archivedHabits.length > 0 && (
+          <div className="border-t border-border/50">
+            <button
+              onClick={() => setShowArchived(!showArchived)}
+              className="w-full px-4 py-3 flex items-center gap-2 text-sm text-muted-foreground hover:bg-muted/30 transition-colors"
+            >
+              <Archive className="w-4 h-4" />
+              <span>{showArchived ? 'Hide' : 'Show'} Archived Habits ({archivedHabits.length})</span>
+            </button>
+            {showArchived && (
+              <div className="px-4 pb-4 space-y-2">
+                {archivedHabits.map(habit => (
+                  <div
+                    key={habit.id}
+                    className="flex items-center justify-between p-3 rounded-lg bg-muted/30 opacity-70"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="w-3 h-3 rounded-full shrink-0"
+                        style={{ backgroundColor: habit.category?.color || '#6366f1' }}
+                      />
+                      <span className="font-medium text-foreground">{habit.title}</span>
+                      <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">Archived</span>
+                    </div>
+                    {onArchiveHabit && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onArchiveHabit(habit.id, false)}
+                        className="text-xs gap-1"
+                      >
+                        Unarchive
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -23,6 +23,7 @@ import { Habit } from '@/types/habits';
    const { loading: authLoading } = useAuth();
   const { 
     habits, 
+    archivedHabits,
     logs, 
     categories, 
     streaks,
@@ -32,6 +33,7 @@ import { Habit } from '@/types/habits';
     createHabit, 
     updateHabit, 
     deleteHabit, 
+    archiveHabit,
     toggleHabitLog, 
     updateLogValue, 
     createCategory 
@@ -151,6 +153,7 @@ import { Habit } from '@/types/habits';
           <TabsContent value="grid" className="mt-4">
             <HabitCheckInGrid
               habits={habits}
+              archivedHabits={archivedHabits}
               logs={logs}
               onToggleLog={toggleHabitLog}
               onUpdateLogValue={updateLogValue}
@@ -158,6 +161,7 @@ import { Habit } from '@/types/habits';
               onDeleteHabit={deleteHabit}
               onAddHabit={() => setShowForm(true)}
                onReorderHabits={handleReorderHabits}
+               onArchiveHabit={archiveHabit}
             />
           </TabsContent>
           
