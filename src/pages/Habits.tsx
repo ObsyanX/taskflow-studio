@@ -9,7 +9,8 @@ import { HabitForm } from '@/components/habits/HabitForm';
 import { HabitHeatmap } from '@/components/habits/HabitHeatmap';
 import { HabitStatsCards } from '@/components/habits/HabitStatsCards';
 import { HabitAnalytics } from '@/components/habits/HabitAnalytics';
- import { HabitReportExport } from '@/components/habits/HabitReportExport';
+import { HabitReportExport } from '@/components/habits/HabitReportExport';
+import { NotificationSoundPicker } from '@/components/habits/NotificationSoundPicker';
  import { useHabitNotifications } from '@/hooks/useHabitNotifications';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
  import { Button } from '@/components/ui/button';
@@ -120,7 +121,8 @@ import { Habit } from '@/types/habits';
              >
                {notificationsEnabled ? <BellRing className="w-4 h-4" /> : <Bell className="w-4 h-4" />}
                {notificationsEnabled ? 'Alerts On' : 'Enable Alerts'}
-             </Button>
+              </Button>
+              <NotificationSoundPicker />
              <HabitReportExport
                habits={habits}
                logs={logs}
