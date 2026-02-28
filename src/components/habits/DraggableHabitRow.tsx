@@ -87,7 +87,7 @@ export function DraggableHabitRow({
        {/* Drag Handle + Habit Name */}
         <td className="sticky left-0 bg-card z-10 px-4 py-3">
           <div className="flex items-center gap-2">
-            {selectionMode && onToggleSelect && (
+            {onToggleSelect && (
               <Checkbox
                 checked={isSelected}
                 onCheckedChange={() => onToggleSelect(habit.id)}
