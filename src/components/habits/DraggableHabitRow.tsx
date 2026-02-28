@@ -1,6 +1,7 @@
- import React from 'react';
- import { useSortable } from '@dnd-kit/sortable';
- import { CSS } from '@dnd-kit/utilities';
+import React from 'react';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { Checkbox } from '@/components/ui/checkbox';
  
  import { 
     Check, 
@@ -21,31 +22,37 @@
  import { cn } from '@/lib/utils';
  import { Habit, HabitLog } from '@/types/habits';
  
- interface DraggableHabitRowProps {
-   habit: Habit;
-   days: Date[];
-   logs: HabitLog[];
-   stats: { completed: number; total: number; percentage: number };
-   onToggleLog: (habitId: string, date: Date) => void;
-    onEditHabit: (habit: Habit) => void;
-    onDeleteHabit: (habitId: string) => void;
-    onArchiveHabit?: (habitId: string, archive: boolean) => void;
-   getCompletionStatus: (habitId: string, date: Date) => string;
-   getCellColor: (status: string) => string;
- }
+interface DraggableHabitRowProps {
+  habit: Habit;
+  days: Date[];
+  logs: HabitLog[];
+  stats: { completed: number; total: number; percentage: number };
+  onToggleLog: (habitId: string, date: Date) => void;
+   onEditHabit: (habit: Habit) => void;
+   onDeleteHabit: (habitId: string) => void;
+   onArchiveHabit?: (habitId: string, archive: boolean) => void;
+  getCompletionStatus: (habitId: string, date: Date) => string;
+  getCellColor: (status: string) => string;
+  isSelected?: boolean;
+  onToggleSelect?: (habitId: string) => void;
+  selectionMode?: boolean;
+}
  
- export function DraggableHabitRow({
-   habit,
-   days,
-   logs,
-   stats,
-    onToggleLog,
-    onEditHabit,
-    onDeleteHabit,
-    onArchiveHabit,
-   getCompletionStatus,
-   getCellColor,
- }: DraggableHabitRowProps) {
+export function DraggableHabitRow({
+  habit,
+  days,
+  logs,
+  stats,
+   onToggleLog,
+   onEditHabit,
+   onDeleteHabit,
+   onArchiveHabit,
+  getCompletionStatus,
+  getCellColor,
+  isSelected = false,
+  onToggleSelect,
+  selectionMode = false,
+}: DraggableHabitRowProps) {
    const {
      attributes,
      listeners,
@@ -78,15 +85,22 @@
        )}
      >
        {/* Drag Handle + Habit Name */}
-       <td className="sticky left-0 bg-card z-10 px-4 py-3">
-         <div className="flex items-center gap-2">
-           <button
-             {...attributes}
-             {...listeners}
-             className="cursor-grab active:cursor-grabbing p-1 rounded hover:bg-muted/50 text-muted-foreground"
-           >
-             <GripVertical className="w-4 h-4" />
-           </button>
+        <td className="sticky left-0 bg-card z-10 px-4 py-3">
+          <div className="flex items-center gap-2">
+            {selectionMode && onToggleSelect && (
+              <Checkbox
+                checked={isSelected}
+                onCheckedChange={() => onToggleSelect(habit.id)}
+                className="mr-1"
+              />
+            )}
+            <button
+              {...attributes}
+              {...listeners}
+              className="cursor-grab active:cursor-grabbing p-1 rounded hover:bg-muted/50 text-muted-foreground"
+            >
+              <GripVertical className="w-4 h-4" />
+            </button>
            <div
              className="w-3 h-3 rounded-full shrink-0"
              style={{ backgroundColor: habit.category?.color || '#6366f1' }}
