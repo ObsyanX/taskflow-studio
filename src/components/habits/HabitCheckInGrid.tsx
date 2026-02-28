@@ -19,7 +19,10 @@ import {
   ChevronRight, 
   Target,
   Plus,
-  Archive
+  Archive,
+  Trash2,
+  CheckSquare,
+  XSquare
 } from 'lucide-react';
  import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths, getWeek } from 'date-fns';
 import { Button } from '@/components/ui/button';
@@ -56,6 +59,36 @@ export function HabitCheckInGrid({
 }: HabitCheckInGridProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showArchived, setShowArchived] = useState(false);
+  const [selectedHabits, setSelectedHabits] = useState<Set<string>>(new Set());
+  const selectionMode = selectedHabits.size > 0;
+
+  const toggleSelect = useCallback((habitId: string) => {
+    setSelectedHabits(prev => {
+      const next = new Set(prev);
+      if (next.has(habitId)) next.delete(habitId);
+      else next.add(habitId);
+      return next;
+    });
+  }, []);
+
+  const selectAll = useCallback(() => {
+    setSelectedHabits(new Set(habits.map(h => h.id)));
+  }, [habits]);
+
+  const clearSelection = useCallback(() => {
+    setSelectedHabits(new Set());
+  }, []);
+
+  const handleBulkArchive = useCallback(() => {
+    if (!onArchiveHabit) return;
+    selectedHabits.forEach(id => onArchiveHabit(id, true));
+    setSelectedHabits(new Set());
+  }, [selectedHabits, onArchiveHabit]);
+
+  const handleBulkDelete = useCallback(() => {
+    selectedHabits.forEach(id => onDeleteHabit(id));
+    setSelectedHabits(new Set());
+  }, [selectedHabits, onDeleteHabit]);
  
    const sensors = useSensors(
      useSensor(PointerSensor),
@@ -163,33 +196,62 @@ export function HabitCheckInGrid({
            collisionDetection={closestCenter}
            onDragEnd={handleDragEnd}
          >
-           {/* Header */}
-        <div className="p-4 border-b border-border/50 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setCurrentDate(subMonths(currentDate, 1))}
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </Button>
-            <h2 className="text-xl font-semibold">
-              {format(currentDate, 'MMMM yyyy')}
-            </h2>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setCurrentDate(addMonths(currentDate, 1))}
-            >
-              <ChevronRight className="w-5 h-5" />
-            </Button>
-          </div>
-          
-          <Button onClick={onAddHabit} size="sm" className="gap-2">
-            <Plus className="w-4 h-4" />
-            Add Habit
-          </Button>
-        </div>
+            {/* Bulk Action Bar */}
+            {selectionMode && (
+              <div className="p-3 border-b border-border/50 bg-primary/5 flex items-center gap-3 animate-in slide-in-from-top-2">
+                <span className="text-sm font-medium text-foreground">
+                  {selectedHabits.size} selected
+                </span>
+                <Button variant="outline" size="sm" onClick={selectAll} className="gap-1.5 text-xs">
+                  <CheckSquare className="w-3.5 h-3.5" />
+                  Select All
+                </Button>
+                <Button variant="outline" size="sm" onClick={clearSelection} className="gap-1.5 text-xs">
+                  <XSquare className="w-3.5 h-3.5" />
+                  Clear
+                </Button>
+                <div className="ml-auto flex items-center gap-2">
+                  {onArchiveHabit && (
+                    <Button variant="secondary" size="sm" onClick={handleBulkArchive} className="gap-1.5">
+                      <Archive className="w-4 h-4" />
+                      Archive ({selectedHabits.size})
+                    </Button>
+                  )}
+                  <Button variant="destructive" size="sm" onClick={handleBulkDelete} className="gap-1.5">
+                    <Trash2 className="w-4 h-4" />
+                    Delete ({selectedHabits.size})
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Header */}
+         <div className="p-4 border-b border-border/50 flex items-center justify-between">
+           <div className="flex items-center gap-4">
+             <Button
+               variant="ghost"
+               size="icon"
+               onClick={() => setCurrentDate(subMonths(currentDate, 1))}
+             >
+               <ChevronLeft className="w-5 h-5" />
+             </Button>
+             <h2 className="text-xl font-semibold">
+               {format(currentDate, 'MMMM yyyy')}
+             </h2>
+             <Button
+               variant="ghost"
+               size="icon"
+               onClick={() => setCurrentDate(addMonths(currentDate, 1))}
+             >
+               <ChevronRight className="w-5 h-5" />
+             </Button>
+           </div>
+           
+           <Button onClick={onAddHabit} size="sm" className="gap-2">
+             <Plus className="w-4 h-4" />
+             Add Habit
+           </Button>
+         </div>
 
            {/* Grid Container */}
            <div className="overflow-x-auto">
@@ -245,24 +307,27 @@ export function HabitCheckInGrid({
                    items={habits.map(h => h.id)}
                    strategy={verticalListSortingStrategy}
                  >
-                   {habits.map((habit) => {
-                     const stats = calculateHabitStats(habit.id);
-                     return (
-                        <DraggableHabitRow
-                          key={habit.id}
-                          habit={habit}
-                          days={days}
-                          logs={logs}
-                          stats={stats}
-                          onToggleLog={onToggleLog}
-                          onEditHabit={onEditHabit}
-                          onDeleteHabit={onDeleteHabit}
-                          onArchiveHabit={onArchiveHabit}
-                          getCompletionStatus={getCompletionStatus}
-                          getCellColor={getCellColor}
-                        />
-                      );
-                    })}
+                    {habits.map((habit) => {
+                      const stats = calculateHabitStats(habit.id);
+                      return (
+                         <DraggableHabitRow
+                           key={habit.id}
+                           habit={habit}
+                           days={days}
+                           logs={logs}
+                           stats={stats}
+                           onToggleLog={onToggleLog}
+                           onEditHabit={onEditHabit}
+                           onDeleteHabit={onDeleteHabit}
+                           onArchiveHabit={onArchiveHabit}
+                           getCompletionStatus={getCompletionStatus}
+                           getCellColor={getCellColor}
+                           isSelected={selectedHabits.has(habit.id)}
+                           onToggleSelect={toggleSelect}
+                           selectionMode={selectionMode}
+                         />
+                       );
+                     })}
                   </SortableContext>
 
               {/* Summary Row */}
