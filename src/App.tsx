@@ -10,6 +10,9 @@ import Landing from "./pages/Landing";
 import FeaturesPage from "./pages/FeaturesPage";
 import PricingPage from "./pages/PricingPage";
 import HowItWorksPage from "./pages/HowItWorksPage";
+import BlogPage from "./pages/BlogPage";
+import BlogPostPage from "./pages/BlogPostPage";
+import TaskManagementGuide from "./pages/TaskManagementGuide";
 import Auth from "./pages/Auth";
 import Habits from "./pages/Habits";
 import Goals from "./pages/Goals";
@@ -29,6 +32,9 @@ const App = () => (
             <Route path="/features" element={<FeaturesPage />} />
             <Route path="/pricing" element={<PricingPage />} />
             <Route path="/how-it-works" element={<HowItWorksPage />} />
+            <Route path="/blog" element={<BlogPage />} />
+            <Route path="/blog/:slug" element={<BlogPostPage />} />
+            <Route path="/task-management-guide" element={<TaskManagementGuide />} />
             <Route path="/auth" element={<Auth />} />
             <Route
               path="/app"
