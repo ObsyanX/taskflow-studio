@@ -150,8 +150,8 @@ export function MainLayout({ children }: MainLayoutProps) {
                         {userInitials}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">{user?.email}</p>
+                    <div className="flex flex-col space-y-1 min-w-0 flex-1">
+                      <p className="text-sm font-medium leading-none truncate max-w-[180px]">{user?.email}</p>
                     </div>
                   </div>
                   <DropdownMenuSeparator />
