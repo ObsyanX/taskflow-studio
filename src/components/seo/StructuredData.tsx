@@ -44,8 +44,8 @@ export function StructuredData({ type = 'SoftwareApplication', data }: Structure
           "@context": "https://schema.org",
           "@type": "Organization",
           "name": "TaskFlow Studio",
-          "url": "https://taskflow-studio-sand.vercel.app",
-          "logo": "https://taskflow-studio-sand.vercel.app/logo.png",
+          "url": "https://bloomscheduler.vercel.app",
+          "logo": "https://bloomscheduler.vercel.app/logo.png",
           "description": "Modern productivity and task management platform",
           "sameAs": [
             "https://twitter.com/taskflowstudio",

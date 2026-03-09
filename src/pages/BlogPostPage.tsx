@@ -35,7 +35,7 @@ export default function BlogPostPage() {
       "name": "TaskFlow Studio",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://taskflow-studio-sand.vercel.app/logo.png"
+        "url": "https://bloomscheduler.vercel.app/logo.png"
       }
     },
     "keywords": post.tags.join(", ")

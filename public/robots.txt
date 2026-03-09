@@ -13,4 +13,4 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://taskflow-studio-sand.vercel.app/sitemap.xml
+Sitemap: https://bloomscheduler.vercel.app/sitemap.xml
