@@ -6,6 +6,10 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/layout/ProtectedRoute";
 import Index from "./pages/Index";
+import Landing from "./pages/Landing";
+import FeaturesPage from "./pages/FeaturesPage";
+import PricingPage from "./pages/PricingPage";
+import HowItWorksPage from "./pages/HowItWorksPage";
 import Auth from "./pages/Auth";
 import Habits from "./pages/Habits";
 import Goals from "./pages/Goals";
@@ -21,9 +25,13 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/features" element={<FeaturesPage />} />
+            <Route path="/pricing" element={<PricingPage />} />
+            <Route path="/how-it-works" element={<HowItWorksPage />} />
             <Route path="/auth" element={<Auth />} />
             <Route
-              path="/"
+              path="/app"
               element={
                 <ProtectedRoute>
                   <Index />
