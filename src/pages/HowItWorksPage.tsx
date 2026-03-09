@@ -1,6 +1,4 @@
 import { SEOHead } from "@/components/seo/SEOHead";
-import { Navbar } from "@/components/landing/Navbar";
-import { Footer } from "@/components/landing/Footer";
 import { HowItWorks } from "@/components/landing/HowItWorks";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";

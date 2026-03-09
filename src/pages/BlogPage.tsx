@@ -1,6 +1,4 @@
 import { SEOHead } from "@/components/seo/SEOHead";
-import { Navbar } from "@/components/landing/Navbar";
-import { Footer } from "@/components/landing/Footer";
 import { BlogCard } from "@/components/blog/BlogCard";
 import { blogPosts } from "@/data/blogPosts";
 import { CheckCircle2 } from "lucide-react";

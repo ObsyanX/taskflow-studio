@@ -74,7 +74,6 @@ export default function FeaturesPage() {
           </div>
         </section>
 
-        <Footer />
       </div>
     </>
   );
