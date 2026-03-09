@@ -31,6 +31,7 @@ import { Button } from '@/components/ui/button';
  import { DraggableHabitRow } from './DraggableHabitRow';
 import { cn } from '@/lib/utils';
 import { Habit, HabitLog } from '@/types/habits';
+import { BulkDeleteConfirmDialog } from './BulkDeleteConfirmDialog';
 
 interface HabitCheckInGridProps {
   habits: Habit[];
@@ -60,6 +61,7 @@ export function HabitCheckInGrid({
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showArchived, setShowArchived] = useState(false);
   const [selectedHabits, setSelectedHabits] = useState<Set<string>>(new Set());
+  const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
   const selectionMode = selectedHabits.size > 0;
 
   const toggleSelect = useCallback((habitId: string) => {
@@ -86,8 +88,13 @@ export function HabitCheckInGrid({
   }, [selectedHabits, onArchiveHabit]);
 
   const handleBulkDelete = useCallback(() => {
+    setShowBulkDeleteConfirm(true);
+  }, []);
+
+  const confirmBulkDelete = useCallback(() => {
     selectedHabits.forEach(id => onDeleteHabit(id));
     setSelectedHabits(new Set());
+    setShowBulkDeleteConfirm(false);
   }, [selectedHabits, onDeleteHabit]);
  
    const sensors = useSensors(
@@ -453,6 +460,14 @@ export function HabitCheckInGrid({
             )}
           </div>
         )}
+
+        <BulkDeleteConfirmDialog
+          open={showBulkDeleteConfirm}
+          onOpenChange={setShowBulkDeleteConfirm}
+          onConfirm={confirmBulkDelete}
+          count={selectedHabits.size}
+          itemType="habits"
+        />
       </div>
     </TooltipProvider>
   );
