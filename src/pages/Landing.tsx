@@ -1,5 +1,6 @@
 import { SEOHead } from "@/components/seo/SEOHead";
 import { StructuredData } from "@/components/seo/StructuredData";
+import { Navbar } from "@/components/landing/Navbar";
 import { Hero } from "@/components/landing/Hero";
 import { Features } from "@/components/landing/Features";
 import { HowItWorks } from "@/components/landing/HowItWorks";
@@ -12,6 +13,7 @@ export default function Landing() {
       <StructuredData type="SoftwareApplication" />
       
       <div className="min-h-screen bg-background">
+        <Navbar />
         <Hero />
         <Features />
         <HowItWorks />

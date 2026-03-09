@@ -13,6 +13,9 @@ import HowItWorksPage from "./pages/HowItWorksPage";
 import BlogPage from "./pages/BlogPage";
 import BlogPostPage from "./pages/BlogPostPage";
 import TaskManagementGuide from "./pages/TaskManagementGuide";
+import ProductivityTools from "./pages/ProductivityTools";
+import WorkflowManagement from "./pages/WorkflowManagement";
+import TaskPlanningGuide from "./pages/TaskPlanningGuide";
 import Auth from "./pages/Auth";
 import Habits from "./pages/Habits";
 import Goals from "./pages/Goals";
@@ -35,6 +38,9 @@ const App = () => (
             <Route path="/blog" element={<BlogPage />} />
             <Route path="/blog/:slug" element={<BlogPostPage />} />
             <Route path="/task-management-guide" element={<TaskManagementGuide />} />
+            <Route path="/productivity-tools" element={<ProductivityTools />} />
+            <Route path="/workflow-management" element={<WorkflowManagement />} />
+            <Route path="/task-planning-guide" element={<TaskPlanningGuide />} />
             <Route path="/auth" element={<Auth />} />
             <Route
               path="/app"
