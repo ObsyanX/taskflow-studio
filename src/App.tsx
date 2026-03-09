@@ -48,6 +48,7 @@ const App = () => (
               <Route path="/productivity-tools" element={<ProductivityTools />} />
               <Route path="/workflow-management" element={<WorkflowManagement />} />
               <Route path="/task-planning-guide" element={<TaskPlanningGuide />} />
+              <Route path="/about" element={<AboutPage />} />
             </Route>
 
             {/* Auth page (no layout) */}
