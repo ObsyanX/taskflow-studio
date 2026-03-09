@@ -12,10 +12,10 @@ export function Footer() {
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center gap-2 mb-4">
               <CheckCircle2 className="w-6 h-6 text-primary" />
-              <span className="text-xl font-bold text-foreground">TaskFlow Studio</span>
+              <span className="text-xl font-bold text-foreground">BloomScheduler</span>
             </div>
             <p className="text-muted-foreground max-w-md">
-              A modern productivity and task management platform designed to help individuals and teams organize tasks, manage workflows, and improve productivity.
+              A modern scheduling and productivity platform designed to simplify meeting coordination, automate booking workflows, and help individuals and teams manage their time efficiently.
             </p>
           </div>
 
@@ -34,13 +34,13 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link to="/how-it-works" className="text-muted-foreground hover:text-primary transition-colors">
-                  How it Works
+                <Link to="/blog" className="text-muted-foreground hover:text-primary transition-colors">
+                  Blog
                 </Link>
               </li>
               <li>
-                <Link to="/blog" className="text-muted-foreground hover:text-primary transition-colors">
-                  Blog
+                <Link to="/about" className="text-muted-foreground hover:text-primary transition-colors">
+                  About
                 </Link>
               </li>
             </ul>
@@ -77,7 +77,7 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="border-t border-border pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-muted-foreground">
-            © {currentYear} TaskFlow Studio. All rights reserved.
+            © {currentYear} BloomScheduler. All rights reserved.
           </p>
           <div className="flex gap-6 text-sm text-muted-foreground">
             <Link to="/privacy" className="hover:text-primary transition-colors">
