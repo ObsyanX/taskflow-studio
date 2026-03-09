@@ -19,6 +19,7 @@ import TaskManagementGuide from "./pages/TaskManagementGuide";
 import ProductivityTools from "./pages/ProductivityTools";
 import WorkflowManagement from "./pages/WorkflowManagement";
 import TaskPlanningGuide from "./pages/TaskPlanningGuide";
+import AboutPage from "./pages/AboutPage";
 import Auth from "./pages/Auth";
 import Habits from "./pages/Habits";
 import Goals from "./pages/Goals";
