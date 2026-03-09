@@ -39,7 +39,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
  import { DraggableGoalCard } from '@/components/goals/DraggableGoalCard';
-import { MainLayout } from '@/components/layout/MainLayout';
+
  import type { Goal } from '@/types/habits';
 
  
