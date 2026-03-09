@@ -12,6 +12,7 @@ import PricingPage from "./pages/PricingPage";
 import HowItWorksPage from "./pages/HowItWorksPage";
 import BlogPage from "./pages/BlogPage";
 import BlogPostPage from "./pages/BlogPostPage";
+import TaskManagementGuide from "./pages/TaskManagementGuide";
 import Auth from "./pages/Auth";
 import Habits from "./pages/Habits";
 import Goals from "./pages/Goals";
