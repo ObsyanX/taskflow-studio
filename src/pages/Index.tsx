@@ -145,7 +145,7 @@ const Index = () => {
   });
 
   return (
-    <MainLayout>
+    <>
       <Spotlight enabled={true} />
 
       <div className="fixed inset-0 pointer-events-none opacity-[0.02] dark:opacity-[0.03]" style={{
