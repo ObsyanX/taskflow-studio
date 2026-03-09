@@ -1,8 +1,40 @@
 import { SEOHead } from "@/components/seo/SEOHead";
+import { StructuredData } from "@/components/seo/StructuredData";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { Check, CheckCircle2 } from "lucide-react";
+
+const pricingFaqData = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Can I change plans later?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is there a free trial for paid plans?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, we offer a 14-day free trial for Pro and Team plans. No credit card required."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What payment methods do you accept?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "We accept all major credit cards, PayPal, and bank transfers for annual plans."
+      }
+    }
+  ]
+};
 
 const pricingPlans = [
   {
@@ -68,6 +100,7 @@ export default function PricingPage() {
         description="Choose the perfect TaskFlow Studio plan for your needs. Start free or upgrade to Pro and Team plans for advanced features, collaboration, and priority support."
         keywords="task management pricing, productivity software pricing, task app plans, team collaboration pricing"
       />
+      <StructuredData type="FAQPage" data={pricingFaqData} />
 
       <div>
         {/* Hero Section */}

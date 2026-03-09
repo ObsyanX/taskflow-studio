@@ -19,6 +19,7 @@ import TaskManagementGuide from "./pages/TaskManagementGuide";
 import ProductivityTools from "./pages/ProductivityTools";
 import WorkflowManagement from "./pages/WorkflowManagement";
 import TaskPlanningGuide from "./pages/TaskPlanningGuide";
+import AboutPage from "./pages/AboutPage";
 import Auth from "./pages/Auth";
 import Habits from "./pages/Habits";
 import Goals from "./pages/Goals";
@@ -47,6 +48,7 @@ const App = () => (
               <Route path="/productivity-tools" element={<ProductivityTools />} />
               <Route path="/workflow-management" element={<WorkflowManagement />} />
               <Route path="/task-planning-guide" element={<TaskPlanningGuide />} />
+              <Route path="/about" element={<AboutPage />} />
             </Route>
 
             {/* Auth page (no layout) */}
