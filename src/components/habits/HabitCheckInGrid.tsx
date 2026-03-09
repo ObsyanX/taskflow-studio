@@ -87,8 +87,13 @@ export function HabitCheckInGrid({
   }, [selectedHabits, onArchiveHabit]);
 
   const handleBulkDelete = useCallback(() => {
+    setShowBulkDeleteConfirm(true);
+  }, []);
+
+  const confirmBulkDelete = useCallback(() => {
     selectedHabits.forEach(id => onDeleteHabit(id));
     setSelectedHabits(new Set());
+    setShowBulkDeleteConfirm(false);
   }, [selectedHabits, onDeleteHabit]);
  
    const sensors = useSensors(
