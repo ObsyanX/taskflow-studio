@@ -11,7 +11,7 @@ import { UndoToast } from '@/components/todo/UndoToast';
 import { DeleteConfirmDialog } from '@/components/todo/DeleteConfirmDialog';
 import { Spotlight } from '@/components/todo/Spotlight';
 import { DiaryView } from '@/components/diary/DiaryView';
-import { MainLayout } from '@/components/layout/MainLayout';
+
 import { useTasks } from '@/hooks/useTasks';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
