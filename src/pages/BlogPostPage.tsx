@@ -60,6 +60,7 @@ export default function BlogPostPage() {
       <StructuredData type="Article" data={articleStructuredData} />
 
       <div className="min-h-screen bg-background">
+        <Navbar />
         {/* Header */}
         <header className="border-b border-border bg-muted/30">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
