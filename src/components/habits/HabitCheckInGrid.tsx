@@ -60,6 +60,7 @@ export function HabitCheckInGrid({
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showArchived, setShowArchived] = useState(false);
   const [selectedHabits, setSelectedHabits] = useState<Set<string>>(new Set());
+  const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
   const selectionMode = selectedHabits.size > 0;
 
   const toggleSelect = useCallback((habitId: string) => {
