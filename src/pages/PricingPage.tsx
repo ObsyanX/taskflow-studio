@@ -100,6 +100,7 @@ export default function PricingPage() {
         description="Choose the perfect TaskFlow Studio plan for your needs. Start free or upgrade to Pro and Team plans for advanced features, collaboration, and priority support."
         keywords="task management pricing, productivity software pricing, task app plans, team collaboration pricing"
       />
+      <StructuredData type="FAQPage" data={pricingFaqData} />
 
       <div>
         {/* Hero Section */}
