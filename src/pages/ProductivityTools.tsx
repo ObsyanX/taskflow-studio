@@ -1,6 +1,4 @@
 import { SEOHead } from "@/components/seo/SEOHead";
-import { Navbar } from "@/components/landing/Navbar";
-import { Footer } from "@/components/landing/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
@@ -65,8 +63,7 @@ export default function ProductivityTools() {
         keywords="productivity tools, best productivity apps, task management tools, habit tracker, goal setting app, productivity software, time management tools"
       />
 
-      <div className="min-h-screen bg-background">
-        <Navbar />
+      <div>
         {/* Hero */}
         <section className="pt-20 pb-12 sm:pt-28 sm:pb-16 bg-gradient-to-b from-background to-muted/20">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -291,7 +288,7 @@ export default function ProductivityTools() {
           </div>
         </section>
 
-        <Footer />
+        
       </div>
     </>
   );

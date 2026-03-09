@@ -11,7 +11,7 @@ import { UndoToast } from '@/components/todo/UndoToast';
 import { DeleteConfirmDialog } from '@/components/todo/DeleteConfirmDialog';
 import { Spotlight } from '@/components/todo/Spotlight';
 import { DiaryView } from '@/components/diary/DiaryView';
-import { MainLayout } from '@/components/layout/MainLayout';
+
 import { useTasks } from '@/hooks/useTasks';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
@@ -145,7 +145,7 @@ const Index = () => {
   });
 
   return (
-    <MainLayout>
+    <>
       <Spotlight enabled={true} />
 
       <div className="fixed inset-0 pointer-events-none opacity-[0.02] dark:opacity-[0.03]" style={{
@@ -251,7 +251,7 @@ const Index = () => {
         onUndo={handleUndo}
         onDismiss={handleDismissUndo}
       />
-    </MainLayout>
+    </>
   );
 };
 

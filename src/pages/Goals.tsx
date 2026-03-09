@@ -39,7 +39,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
  import { DraggableGoalCard } from '@/components/goals/DraggableGoalCard';
-import { MainLayout } from '@/components/layout/MainLayout';
+
  import type { Goal } from '@/types/habits';
 
  
@@ -199,7 +199,7 @@ export default function Goals() {
     : 0;
 
   return (
-    <MainLayout>
+    <>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -449,6 +449,6 @@ export default function Goals() {
           </DialogContent>
         </Dialog>
       </div>
-    </MainLayout>
+    </>
   );
 }

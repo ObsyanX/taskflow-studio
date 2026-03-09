@@ -16,7 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
  import { Button } from '@/components/ui/button';
  import { Bell, BellRing } from 'lucide-react';
  import { toast } from 'sonner';
-import { MainLayout } from '@/components/layout/MainLayout';
+
 import { Habit } from '@/types/habits';
 
  export default function Habits() { 
@@ -100,16 +100,16 @@ import { Habit } from '@/types/habits';
 
   if (authLoading || loading) {
     return (
-      <MainLayout>
+      <>
         <div className="flex items-center justify-center py-20">
           <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
         </div>
-      </MainLayout>
+      </>
     );
   }
 
   return (
-    <MainLayout>
+    <>
       <div className="space-y-6">
          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
            <div>
@@ -187,6 +187,6 @@ import { Habit } from '@/types/habits';
         categories={categories}
         onCreateCategory={createCategory}
       />
-    </MainLayout>
+    </>
   );
 }

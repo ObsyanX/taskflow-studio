@@ -1,6 +1,4 @@
 import { SEOHead } from "@/components/seo/SEOHead";
-import { Navbar } from "@/components/landing/Navbar";
-import { Footer } from "@/components/landing/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
@@ -71,8 +69,7 @@ export default function PricingPage() {
         keywords="task management pricing, productivity software pricing, task app plans, team collaboration pricing"
       />
 
-      <div className="min-h-screen bg-background">
-        <Navbar />
+      <div>
         {/* Hero Section */}
         <section className="pt-20 pb-12 sm:pt-28 sm:pb-16 bg-gradient-to-b from-background to-muted/20">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -193,7 +190,7 @@ export default function PricingPage() {
           </div>
         </section>
 
-        <Footer />
+        
       </div>
     </>
   );
