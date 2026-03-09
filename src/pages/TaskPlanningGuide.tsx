@@ -21,8 +21,7 @@ export default function TaskPlanningGuide() {
         keywords="task planning, how to plan tasks, task breakdown, project planning, task estimation, task prioritization, planning strategies"
       />
 
-      <div className="min-h-screen bg-background">
-        <Navbar />
+      <div>
         {/* Hero */}
         <section className="pt-20 pb-12 sm:pt-28 sm:pb-16 bg-gradient-to-b from-background to-muted/20">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
