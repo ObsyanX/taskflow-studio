@@ -31,7 +31,7 @@ interface MainLayoutProps {
 }
 
 const navItems = [
-  { path: '/', label: 'Tasks', icon: CheckSquare },
+  { path: '/app', label: 'Tasks', icon: CheckSquare },
   { path: '/habits', label: 'Habits', icon: Repeat },
   { path: '/goals', label: 'Goals', icon: Target },
 ];
