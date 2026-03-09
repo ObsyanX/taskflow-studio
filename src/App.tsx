@@ -34,6 +34,7 @@ const App = () => (
             <Route path="/how-it-works" element={<HowItWorksPage />} />
             <Route path="/blog" element={<BlogPage />} />
             <Route path="/blog/:slug" element={<BlogPostPage />} />
+            <Route path="/task-management-guide" element={<TaskManagementGuide />} />
             <Route path="/auth" element={<Auth />} />
             <Route
               path="/app"
