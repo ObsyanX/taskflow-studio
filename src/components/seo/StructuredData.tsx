@@ -12,7 +12,7 @@ export function StructuredData({ type = 'SoftwareApplication', data }: Structure
         return {
           "@context": "https://schema.org",
           "@type": "SoftwareApplication",
-          "name": "TaskFlow Studio",
+          "name": "BloomScheduler",
           "applicationCategory": "ProductivityApplication",
           "operatingSystem": "Web",
           "offers": {
@@ -20,17 +20,17 @@ export function StructuredData({ type = 'SoftwareApplication', data }: Structure
             "price": "0",
             "priceCurrency": "USD"
           },
-          "description": "TaskFlow Studio is a modern productivity and task management platform designed to help individuals and teams organize tasks, manage workflows, track progress, and improve productivity.",
+          "description": "BloomScheduler is a modern scheduling and productivity platform designed to simplify meeting coordination, automate booking workflows, and help individuals and teams manage their time efficiently.",
           "screenshot": "https://bloomscheduler.vercel.app/og-image.png",
           "featureList": [
-            "Task Management",
-            "Workflow Tracking",
+            "Meeting Scheduling",
+            "Booking Automation",
+            "Availability Management",
+            "Calendar Integration",
             "Team Collaboration",
-            "Productivity Insights",
-            "Real-Time Updates",
             "Habit Tracking",
             "Goal Setting",
-            "Diary Journaling"
+            "Task Management"
           ],
           "aggregateRating": {
             "@type": "AggregateRating",
@@ -43,13 +43,13 @@ export function StructuredData({ type = 'SoftwareApplication', data }: Structure
         return {
           "@context": "https://schema.org",
           "@type": "Organization",
-          "name": "TaskFlow Studio",
+          "name": "BloomScheduler",
           "url": "https://bloomscheduler.vercel.app",
           "logo": "https://bloomscheduler.vercel.app/logo.png",
-          "description": "Modern productivity and task management platform",
+          "description": "Modern scheduling and productivity platform",
           "sameAs": [
-            "https://twitter.com/taskflowstudio",
-            "https://linkedin.com/company/taskflowstudio"
+            "https://twitter.com/bloomscheduler",
+            "https://linkedin.com/company/bloomscheduler"
           ]
         };
 
