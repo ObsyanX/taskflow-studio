@@ -296,7 +296,7 @@ export default function TaskManagementGuide() {
           </div>
         </section>
 
-        <Footer />
+        
       </div>
     </>
   );

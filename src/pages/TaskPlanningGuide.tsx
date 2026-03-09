@@ -304,7 +304,7 @@ export default function TaskPlanningGuide() {
           </div>
         </section>
 
-        <Footer />
+        
       </div>
     </>
   );

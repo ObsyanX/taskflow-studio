@@ -284,7 +284,7 @@ export default function WorkflowManagement() {
           </div>
         </section>
 
-        <Footer />
+        
       </div>
     </>
   );

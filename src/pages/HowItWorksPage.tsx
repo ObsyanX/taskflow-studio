@@ -126,7 +126,7 @@ export default function HowItWorksPage() {
           </div>
         </section>
 
-        <Footer />
+        
       </div>
     </>
   );
