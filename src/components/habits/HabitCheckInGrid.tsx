@@ -31,6 +31,7 @@ import { Button } from '@/components/ui/button';
  import { DraggableHabitRow } from './DraggableHabitRow';
 import { cn } from '@/lib/utils';
 import { Habit, HabitLog } from '@/types/habits';
+import { BulkDeleteConfirmDialog } from './BulkDeleteConfirmDialog';
 
 interface HabitCheckInGridProps {
   habits: Habit[];
