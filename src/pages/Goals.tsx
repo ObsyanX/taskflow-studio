@@ -449,6 +449,6 @@ export default function Goals() {
           </DialogContent>
         </Dialog>
       </div>
-    </MainLayout>
+    </>
   );
 }
