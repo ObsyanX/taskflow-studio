@@ -38,6 +38,9 @@ const App = () => (
             <Route path="/blog" element={<BlogPage />} />
             <Route path="/blog/:slug" element={<BlogPostPage />} />
             <Route path="/task-management-guide" element={<TaskManagementGuide />} />
+            <Route path="/productivity-tools" element={<ProductivityTools />} />
+            <Route path="/workflow-management" element={<WorkflowManagement />} />
+            <Route path="/task-planning-guide" element={<TaskPlanningGuide />} />
             <Route path="/auth" element={<Auth />} />
             <Route
               path="/app"
