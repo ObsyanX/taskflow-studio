@@ -251,7 +251,7 @@ const Index = () => {
         onUndo={handleUndo}
         onDismiss={handleDismissUndo}
       />
-    </MainLayout>
+    </>
   );
 };
 

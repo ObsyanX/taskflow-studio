@@ -187,6 +187,6 @@ import { Habit } from '@/types/habits';
         categories={categories}
         onCreateCategory={createCategory}
       />
-    </MainLayout>
+    </>
   );
 }
