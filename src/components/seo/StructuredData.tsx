@@ -21,7 +21,7 @@ export function StructuredData({ type = 'SoftwareApplication', data }: Structure
             "priceCurrency": "USD"
           },
           "description": "TaskFlow Studio is a modern productivity and task management platform designed to help individuals and teams organize tasks, manage workflows, track progress, and improve productivity.",
-          "screenshot": "https://taskflow-studio-sand.vercel.app/og-image.png",
+          "screenshot": "https://bloomscheduler.vercel.app/og-image.png",
           "featureList": [
             "Task Management",
             "Workflow Tracking",
@@ -44,8 +44,8 @@ export function StructuredData({ type = 'SoftwareApplication', data }: Structure
           "@context": "https://schema.org",
           "@type": "Organization",
           "name": "TaskFlow Studio",
-          "url": "https://taskflow-studio-sand.vercel.app",
-          "logo": "https://taskflow-studio-sand.vercel.app/logo.png",
+          "url": "https://bloomscheduler.vercel.app",
+          "logo": "https://bloomscheduler.vercel.app/logo.png",
           "description": "Modern productivity and task management platform",
           "sameAs": [
             "https://twitter.com/taskflowstudio",

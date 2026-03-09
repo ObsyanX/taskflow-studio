@@ -2,7 +2,7 @@
 
 TaskFlow Studio is a modern, responsive task management web application designed to help users organize, track, and manage their daily workflows efficiently. Built with a clean UI, smooth interactions, and scalable architecture, it focuses on productivity, simplicity, and performance.
 
-🔗 **Live Demo:** https://taskflow-studio-sand.vercel.app/
+🔗 **Live Demo:** https://bloomscheduler.vercel.app/
 
 ---
 
