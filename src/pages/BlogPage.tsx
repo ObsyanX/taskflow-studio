@@ -1,4 +1,5 @@
 import { SEOHead } from "@/components/seo/SEOHead";
+import { Navbar } from "@/components/landing/Navbar";
 import { Footer } from "@/components/landing/Footer";
 import { BlogCard } from "@/components/blog/BlogCard";
 import { blogPosts } from "@/data/blogPosts";
@@ -17,6 +18,7 @@ export default function BlogPage() {
       />
 
       <div className="min-h-screen bg-background">
+        <Navbar />
         {/* Hero Section */}
         <section className="pt-20 pb-12 sm:pt-28 sm:pb-16 bg-gradient-to-b from-background to-muted/20">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
