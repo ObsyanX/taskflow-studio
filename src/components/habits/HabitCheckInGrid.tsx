@@ -460,6 +460,14 @@ export function HabitCheckInGrid({
             )}
           </div>
         )}
+
+        <BulkDeleteConfirmDialog
+          open={showBulkDeleteConfirm}
+          onOpenChange={setShowBulkDeleteConfirm}
+          onConfirm={confirmBulkDelete}
+          count={selectedHabits.size}
+          itemType="habits"
+        />
       </div>
     </TooltipProvider>
   );
