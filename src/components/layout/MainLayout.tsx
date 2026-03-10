@@ -91,7 +91,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                 </SheetContent>
               </Sheet>
 
-              <Link to="/app" className="flex items-center gap-2">
+              <Link to="/" className="flex items-center gap-2">
                 <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
                   <CheckSquare className="h-4 w-4 text-primary-foreground" />
                 </div>
