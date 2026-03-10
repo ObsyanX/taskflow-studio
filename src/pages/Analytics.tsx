@@ -12,10 +12,10 @@ import {
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid,
   PieChart, Pie, Cell, BarChart, Bar,
-  ResponsiveContainer, Legend, Tooltip,
+  ResponsiveContainer, Tooltip,
 } from 'recharts';
 import {
-  CheckCircle2, Clock, AlertTriangle, TrendingUp,
+  CheckCircle2, AlertTriangle, TrendingUp,
   Target, Repeat, BarChart3, Lightbulb, Info, Flame,
   ListTodo, Activity
 } from 'lucide-react';
