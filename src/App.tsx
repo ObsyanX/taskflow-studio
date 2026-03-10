@@ -60,6 +60,7 @@ const App = () => (
               <Route path="/app" element={<Index />} />
               <Route path="/habits" element={<Habits />} />
               <Route path="/goals" element={<Goals />} />
+              <Route path="/analytics" element={<Analytics />} />
             </Route>
 
             {/* 404 Catch-all */}

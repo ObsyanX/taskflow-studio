@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const COLORS = ['hsl(0, 75%, 55%)', 'hsl(38, 95%, 55%)', 'hsl(150, 70%, 45%)', 'hsl(220, 70%, 55%)'];
+
 
 function StatCard({ title, value, subtitle, icon: Icon, trend }: {
   title: string; value: string | number; subtitle?: string;

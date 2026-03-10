@@ -202,7 +202,7 @@ export function useAnalytics(
     const tasksByDay = [0, 0, 0, 0, 0, 0, 0];
     tasks.forEach(t => { tasksByDay[getDay(parseISO(t.createdAt))]++; });
     const busiestDay = tasksByDay.indexOf(Math.max(...tasksByDay));
-    const quietestDay = tasksByDay.indexOf(Math.min(...tasksByDay));
+    
     if (Math.max(...tasksByDay) > 0) {
       insights.push({ type: 'tip', message: `Your busiest day is ${dayNames[busiestDay]}. Consider distributing tasks more evenly across the week for better balance.` });
     }

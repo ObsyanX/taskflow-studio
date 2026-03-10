@@ -33,6 +33,7 @@ const navItems = [
   { path: '/app', label: 'Tasks', icon: CheckSquare },
   { path: '/habits', label: 'Habits', icon: Repeat },
   { path: '/goals', label: 'Goals', icon: Target },
+  { path: '/analytics', label: 'Analytics', icon: BarChart3 },
 ];
 
 export function MainLayout({ children }: MainLayoutProps) {
