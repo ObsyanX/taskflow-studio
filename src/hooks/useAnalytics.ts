@@ -2,8 +2,8 @@ import { useMemo } from 'react';
 import { Task } from '@/types/task';
 import { Habit, HabitLog, HabitStreak, Goal } from '@/types/habits';
 import { 
-  format, parseISO, differenceInHours, subDays, startOfWeek, endOfWeek, 
-  eachDayOfInterval, isAfter, isBefore, startOfDay, getDay, getHours 
+  format, parseISO, differenceInHours, subDays,
+  eachDayOfInterval, isBefore, getDay, getHours 
 } from 'date-fns';
 
 export interface ProductivityMetrics {
