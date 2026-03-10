@@ -108,7 +108,7 @@ export default function Auth() {
           >
             <Sparkles className="w-8 h-8 text-primary" />
           </motion.div>
-          <h1 className="text-3xl font-bold text-foreground">Bloom</h1>
+          <h1 className="text-3xl font-bold text-foreground">BloomScheduler</h1>
           <p className="text-muted-foreground mt-2">
             {isLogin ? 'Welcome back!' : 'Start your journey'}
           </p>

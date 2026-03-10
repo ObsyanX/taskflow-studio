@@ -67,7 +67,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                 <SheetContent side="left" className="w-64 p-0">
                   <div className="flex flex-col h-full">
                     <div className="p-4 border-b border-border">
-                      <h2 className="text-lg font-semibold">Bloom</h2>
+                      <h2 className="text-lg font-semibold">BloomScheduler</h2>
                     </div>
                     <nav className="flex-1 p-4 space-y-2">
                       {navItems.map((item) => (
@@ -95,7 +95,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                 <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
                   <CheckSquare className="h-4 w-4 text-primary-foreground" />
                 </div>
-                <span className="text-lg font-semibold hidden sm:block">Bloom</span>
+                <span className="text-lg font-semibold hidden sm:block">BloomScheduler</span>
               </Link>
             </div>
 
