@@ -95,7 +95,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                 <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
                   <CheckSquare className="h-4 w-4 text-primary-foreground" />
                 </div>
-                <span className="text-lg font-semibold hidden sm:block">Bloom</span>
+                <span className="text-lg font-semibold hidden sm:block">BloomScheduler</span>
               </Link>
             </div>
 
