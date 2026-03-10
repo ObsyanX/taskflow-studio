@@ -67,7 +67,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                 <SheetContent side="left" className="w-64 p-0">
                   <div className="flex flex-col h-full">
                     <div className="p-4 border-b border-border">
-                      <h2 className="text-lg font-semibold">Bloom</h2>
+                      <h2 className="text-lg font-semibold">BloomScheduler</h2>
                     </div>
                     <nav className="flex-1 p-4 space-y-2">
                       {navItems.map((item) => (
