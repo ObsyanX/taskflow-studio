@@ -23,6 +23,7 @@ import AboutPage from "./pages/AboutPage";
 import Auth from "./pages/Auth";
 import Habits from "./pages/Habits";
 import Goals from "./pages/Goals";
+import Analytics from "./pages/Analytics";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -59,6 +60,7 @@ const App = () => (
               <Route path="/app" element={<Index />} />
               <Route path="/habits" element={<Habits />} />
               <Route path="/goals" element={<Goals />} />
+              <Route path="/analytics" element={<Analytics />} />
             </Route>
 
             {/* 404 Catch-all */}
