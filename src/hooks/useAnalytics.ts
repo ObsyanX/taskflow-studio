@@ -178,7 +178,7 @@ export function useAnalytics(
 
   const aiInsights = useMemo((): AIInsight[] => {
     const insights: AIInsight[] = [];
-    const { completionRate, overdueTasks, totalTasks, completedTasks } = productivityMetrics;
+    const { completionRate, overdueTasks, totalTasks } = productivityMetrics;
 
     if (totalTasks === 0) {
       insights.push({ type: 'info', message: "You haven't created any tasks yet. Start adding tasks to see productivity insights!" });
