@@ -9,7 +9,8 @@ import {
   Menu,
   Sun,
   Moon,
-  BarChart3
+  BarChart3,
+  Clock
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -33,6 +34,7 @@ const navItems = [
   { path: '/app', label: 'Tasks', icon: CheckSquare },
   { path: '/habits', label: 'Habits', icon: Repeat },
   { path: '/goals', label: 'Goals', icon: Target },
+  { path: '/routine', label: 'Routine', icon: Clock },
   { path: '/analytics', label: 'Analytics', icon: BarChart3 },
 ];
 

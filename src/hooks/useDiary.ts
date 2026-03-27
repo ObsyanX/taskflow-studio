@@ -43,8 +43,8 @@ export function useDiary(): UseDiaryReturn {
   const [error, setError] = useState<string | null>(null);
   
   const pinRef = useRef<string | null>(null);
-  const autoLockTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const autoLockTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
   const isSetup = !!settings?.pinHash;
 
