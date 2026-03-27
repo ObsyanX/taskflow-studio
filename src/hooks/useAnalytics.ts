@@ -3,8 +3,8 @@ import { Task } from '@/types/task';
 import { Habit, HabitLog, HabitStreak, Goal } from '@/types/habits';
 import { 
   format, parseISO, differenceInHours, differenceInDays,
-  eachDayOfInterval, isBefore, isAfter, isWithinInterval,
-  getDay, getHours, startOfDay, endOfDay
+  eachDayOfInterval, isBefore, isWithinInterval,
+  getDay, startOfDay, endOfDay
 } from 'date-fns';
 
 export interface ProductivityMetrics {
