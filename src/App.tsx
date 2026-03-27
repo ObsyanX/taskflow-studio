@@ -24,6 +24,7 @@ import Auth from "./pages/Auth";
 import Habits from "./pages/Habits";
 import Goals from "./pages/Goals";
 import Analytics from "./pages/Analytics";
+import Routine from "./pages/Routine";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -60,6 +61,7 @@ const App = () => (
               <Route path="/app" element={<Index />} />
               <Route path="/habits" element={<Habits />} />
               <Route path="/goals" element={<Goals />} />
+              <Route path="/routine" element={<Routine />} />
               <Route path="/analytics" element={<Analytics />} />
             </Route>
 
