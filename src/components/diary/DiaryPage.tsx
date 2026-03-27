@@ -72,7 +72,7 @@ export const DiaryPage = memo(function DiaryPage({
     } catch {}
     return 19;
   });
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { playPageFlip } = usePageFlipSound();
 
   const current = parseISO(currentDate);

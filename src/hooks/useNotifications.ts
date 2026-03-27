@@ -14,7 +14,7 @@ export function useNotifications(
   tasks: Task[],
   onReminderFired: (taskId: string) => void
 ) {
-  const timeoutsRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
+  const timeoutsRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
   const permissionRef = useRef<NotificationPermission>('default');
 
   // Request notification permission
