@@ -2,8 +2,9 @@ import { useMemo } from 'react';
 import { Task } from '@/types/task';
 import { Habit, HabitLog, HabitStreak, Goal } from '@/types/habits';
 import { 
-  format, parseISO, differenceInHours, subDays,
-  eachDayOfInterval, isBefore, getDay, getHours 
+  format, parseISO, differenceInHours, differenceInDays,
+  eachDayOfInterval, isBefore, isWithinInterval,
+  getDay, startOfDay, endOfDay
 } from 'date-fns';
 
 export interface ProductivityMetrics {
@@ -47,15 +48,21 @@ export interface GoalInsight {
   priorityDistribution: PriorityDistribution[];
 }
 
-export interface ActivityHeatmapData {
-  day: number; // 0-6
-  hour: number; // 0-23
-  count: number;
-}
-
 export interface AIInsight {
   type: 'info' | 'warning' | 'success' | 'tip';
   message: string;
+}
+
+export interface DateRange {
+  from: Date;
+  to: Date;
+}
+
+function isInRange(dateStr: string, range: DateRange): boolean {
+  try {
+    const d = parseISO(dateStr);
+    return isWithinInterval(d, { start: startOfDay(range.from), end: endOfDay(range.to) });
+  } catch { return false; }
 }
 
 export function useAnalytics(
@@ -63,85 +70,87 @@ export function useAnalytics(
   habits: Habit[],
   habitLogs: HabitLog[],
   streaks: HabitStreak[],
-  goals: Goal[]
+  goals: Goal[],
+  dateRange?: DateRange
 ) {
   const now = new Date();
 
+  const filteredTasks = useMemo(() => {
+    if (!dateRange) return tasks;
+    return tasks.filter(t => isInRange(t.createdAt, dateRange));
+  }, [tasks, dateRange]);
+
+  const filteredLogs = useMemo(() => {
+    if (!dateRange) return habitLogs;
+    return habitLogs.filter(l => {
+      try {
+        const d = parseISO(l.log_date);
+        return isWithinInterval(d, { start: startOfDay(dateRange.from), end: endOfDay(dateRange.to) });
+      } catch { return false; }
+    });
+  }, [habitLogs, dateRange]);
+
   const productivityMetrics = useMemo((): ProductivityMetrics => {
-    const completedTasks = tasks.filter(t => t.done);
-    const activeTasks = tasks.filter(t => !t.done);
-    const overdueTasks = tasks.filter(t => !t.done && t.due && isBefore(parseISO(t.due), now));
+    const completedTasks = filteredTasks.filter(t => t.done);
+    const activeTasks = filteredTasks.filter(t => !t.done);
+    const overdueTasks = filteredTasks.filter(t => !t.done && t.due && isBefore(parseISO(t.due), now));
     
     const today = format(now, 'yyyy-MM-dd');
     const tasksCompletedToday = completedTasks.filter(t => 
       format(parseISO(t.createdAt), 'yyyy-MM-dd') === today && t.done
     ).length;
 
-    // Avg completion time: approximate using createdAt to due (for completed tasks with due dates)
     const completedWithDue = completedTasks.filter(t => t.due);
     const avgCompletionTimeHours = completedWithDue.length > 0
       ? completedWithDue.reduce((sum, t) => sum + Math.abs(differenceInHours(parseISO(t.due!), parseISO(t.createdAt))), 0) / completedWithDue.length
       : 0;
 
     return {
-      totalTasks: tasks.length,
+      totalTasks: filteredTasks.length,
       completedTasks: completedTasks.length,
       activeTasks: activeTasks.length,
       overdueTasks: overdueTasks.length,
-      completionRate: tasks.length > 0 ? Math.round((completedTasks.length / tasks.length) * 100) : 0,
+      completionRate: filteredTasks.length > 0 ? Math.round((completedTasks.length / filteredTasks.length) * 100) : 0,
       avgCompletionTimeHours: Math.round(avgCompletionTimeHours),
       tasksCompletedToday,
     };
-  }, [tasks]);
+  }, [filteredTasks]);
 
   const dailyCompletionData = useMemo((): DailyCompletionData[] => {
-    const days = eachDayOfInterval({ start: subDays(now, 13), end: now });
-    return days.map(day => {
+    const rangeFrom = dateRange?.from ?? new Date(now.getTime() - 13 * 86400000);
+    const rangeTo = dateRange?.to ?? now;
+    const days = eachDayOfInterval({ start: rangeFrom, end: rangeTo });
+    // Limit to last 60 days max for performance
+    const limitedDays = days.length > 60 ? days.slice(-60) : days;
+    return limitedDays.map(day => {
       const dateStr = format(day, 'yyyy-MM-dd');
-      const completed = tasks.filter(t => t.done && format(parseISO(t.createdAt), 'yyyy-MM-dd') === dateStr).length;
-      const created = tasks.filter(t => format(parseISO(t.createdAt), 'yyyy-MM-dd') === dateStr).length;
+      const completed = filteredTasks.filter(t => t.done && format(parseISO(t.createdAt), 'yyyy-MM-dd') === dateStr).length;
+      const created = filteredTasks.filter(t => format(parseISO(t.createdAt), 'yyyy-MM-dd') === dateStr).length;
       return { date: dateStr, label: format(day, 'MMM dd'), completed, created };
     });
-  }, [tasks]);
+  }, [filteredTasks, dateRange]);
 
   const priorityDistribution = useMemo((): PriorityDistribution[] => {
-    const high = tasks.filter(t => t.priority === 'High').length;
-    const medium = tasks.filter(t => t.priority === 'Medium').length;
-    const low = tasks.filter(t => t.priority === 'Low').length;
+    const high = filteredTasks.filter(t => t.priority === 'High').length;
+    const medium = filteredTasks.filter(t => t.priority === 'Medium').length;
+    const low = filteredTasks.filter(t => t.priority === 'Low').length;
     return [
       { name: 'High', value: high, color: 'hsl(0, 75%, 55%)' },
       { name: 'Medium', value: medium, color: 'hsl(38, 95%, 55%)' },
       { name: 'Low', value: low, color: 'hsl(150, 70%, 45%)' },
     ];
-  }, [tasks]);
+  }, [filteredTasks]);
 
   const statusDistribution = useMemo((): PriorityDistribution[] => {
-    const completed = tasks.filter(t => t.done).length;
-    const active = tasks.filter(t => !t.done && (!t.due || !isBefore(parseISO(t.due), now))).length;
-    const overdue = tasks.filter(t => !t.done && t.due && isBefore(parseISO(t.due), now)).length;
+    const completed = filteredTasks.filter(t => t.done).length;
+    const active = filteredTasks.filter(t => !t.done && (!t.due || !isBefore(parseISO(t.due), now))).length;
+    const overdue = filteredTasks.filter(t => !t.done && t.due && isBefore(parseISO(t.due), now)).length;
     return [
       { name: 'Completed', value: completed, color: 'hsl(150, 70%, 45%)' },
       { name: 'Active', value: active, color: 'hsl(220, 70%, 55%)' },
       { name: 'Overdue', value: overdue, color: 'hsl(0, 75%, 55%)' },
     ];
-  }, [tasks]);
-
-  const activityHeatmap = useMemo((): ActivityHeatmapData[] => {
-    const data: ActivityHeatmapData[] = [];
-    for (let day = 0; day < 7; day++) {
-      for (let hour = 0; hour < 24; hour++) {
-        data.push({ day, hour, count: 0 });
-      }
-    }
-    tasks.forEach(t => {
-      const d = parseISO(t.createdAt);
-      const dayIdx = getDay(d);
-      const hourIdx = getHours(d);
-      const entry = data.find(e => e.day === dayIdx && e.hour === hourIdx);
-      if (entry) entry.count++;
-    });
-    return data;
-  }, [tasks]);
+  }, [filteredTasks]);
 
   const habitInsight = useMemo((): HabitInsight => {
     const activeHabits = habits.filter(h => !h.is_archived);
@@ -149,19 +158,22 @@ export function useAnalytics(
       ? Math.round(streaks.reduce((s, st) => s + (st.current_streak || 0), 0) / streaks.length)
       : 0;
     const bestStreak = streaks.length > 0 ? Math.max(...streaks.map(s => s.longest_streak || 0)) : 0;
-    const completedLogs = habitLogs.filter(l => l.completed).length;
-    const completionRate = habitLogs.length > 0 ? Math.round((completedLogs / habitLogs.length) * 100) : 0;
+    const completedLogs = filteredLogs.filter(l => l.completed).length;
+    const completionRate = filteredLogs.length > 0 ? Math.round((completedLogs / filteredLogs.length) * 100) : 0;
 
-    const days = eachDayOfInterval({ start: subDays(now, 13), end: now });
-    const dailyCompletionData = days.map(day => {
+    const rangeFrom = dateRange?.from ?? new Date(now.getTime() - 13 * 86400000);
+    const rangeTo = dateRange?.to ?? now;
+    const days = eachDayOfInterval({ start: rangeFrom, end: rangeTo });
+    const limitedDays = days.length > 60 ? days.slice(-60) : days;
+    const dailyCompletionData = limitedDays.map(day => {
       const dateStr = format(day, 'yyyy-MM-dd');
-      const dayLogs = habitLogs.filter(l => l.log_date === dateStr);
+      const dayLogs = filteredLogs.filter(l => l.log_date === dateStr);
       const completed = dayLogs.filter(l => l.completed).length;
       return { date: dateStr, label: format(day, 'MMM dd'), completed, total: activeHabits.length };
     });
 
     return { totalHabits: habits.length, activeHabits: activeHabits.length, avgStreak, bestStreak, completionRate, dailyCompletionData };
-  }, [habits, habitLogs, streaks]);
+  }, [habits, filteredLogs, streaks, dateRange]);
 
   const goalInsight = useMemo((): GoalInsight => {
     const completedGoals = goals.filter(g => g.status === 'completed').length;
@@ -178,10 +190,10 @@ export function useAnalytics(
 
   const aiInsights = useMemo((): AIInsight[] => {
     const insights: AIInsight[] = [];
-    const { completionRate, overdueTasks, totalTasks } = productivityMetrics;
+    const { completionRate, overdueTasks, totalTasks, avgCompletionTimeHours } = productivityMetrics;
 
     if (totalTasks === 0) {
-      insights.push({ type: 'info', message: "You haven't created any tasks yet. Start adding tasks to see productivity insights!" });
+      insights.push({ type: 'info', message: "No tasks found in this period. Start adding tasks to see productivity insights!" });
       return insights;
     }
 
@@ -197,14 +209,21 @@ export function useAnalytics(
       insights.push({ type: 'warning', message: `You have ${overdueTasks} overdue task${overdueTasks > 1 ? 's' : ''}. Review and reschedule or complete them to stay on track.` });
     }
 
-    // Day-of-week pattern analysis
+    if (avgCompletionTimeHours > 0) {
+      if (avgCompletionTimeHours < 24) {
+        insights.push({ type: 'success', message: `Average task turnaround is ${avgCompletionTimeHours}h — you're completing tasks quickly!` });
+      } else if (avgCompletionTimeHours > 72) {
+        insights.push({ type: 'tip', message: `Tasks take an average of ${Math.round(avgCompletionTimeHours / 24)} days to complete. Try setting tighter deadlines.` });
+      }
+    }
+
+    // Day-of-week pattern
     const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const tasksByDay = [0, 0, 0, 0, 0, 0, 0];
-    tasks.forEach(t => { tasksByDay[getDay(parseISO(t.createdAt))]++; });
+    filteredTasks.forEach(t => { tasksByDay[getDay(parseISO(t.createdAt))]++; });
     const busiestDay = tasksByDay.indexOf(Math.max(...tasksByDay));
-    
     if (Math.max(...tasksByDay) > 0) {
-      insights.push({ type: 'tip', message: `Your busiest day is ${dayNames[busiestDay]}. Consider distributing tasks more evenly across the week for better balance.` });
+      insights.push({ type: 'tip', message: `Your busiest day is ${dayNames[busiestDay]}. Consider distributing tasks more evenly across the week.` });
     }
 
     // Habit insights
@@ -215,7 +234,12 @@ export function useAnalytics(
       insights.push({ type: 'warning', message: `Your habit completion rate is ${habitInsight.completionRate}%. Try starting with fewer habits to build momentum.` });
     }
 
-    // Goal insights
+    // Goal predictions
+    if (goalInsight.inProgressGoals > 0 && goalInsight.avgProgress > 0) {
+      const daysToComplete = Math.round((100 - goalInsight.avgProgress) / Math.max(goalInsight.avgProgress / 30, 1));
+      insights.push({ type: 'info', message: `At your current pace, in-progress goals may reach completion in ~${daysToComplete} days. Keep pushing!` });
+    }
+
     if (goalInsight.overdueGoals > 0) {
       insights.push({ type: 'warning', message: `${goalInsight.overdueGoals} goal${goalInsight.overdueGoals > 1 ? 's are' : ' is'} past deadline. Review and adjust timelines.` });
     }
@@ -223,21 +247,27 @@ export function useAnalytics(
       insights.push({ type: 'success', message: `You've completed ${goalInsight.completedGoals} goal${goalInsight.completedGoals > 1 ? 's' : ''}! Great progress.` });
     }
 
-    // High priority task ratio
-    const highPriorityRatio = tasks.length > 0 ? tasks.filter(t => t.priority === 'High').length / tasks.length : 0;
+    // High priority ratio
+    const highPriorityRatio = filteredTasks.length > 0 ? filteredTasks.filter(t => t.priority === 'High').length / filteredTasks.length : 0;
     if (highPriorityRatio > 0.5) {
       insights.push({ type: 'tip', message: "Over 50% of your tasks are high-priority. If everything is urgent, nothing is. Re-evaluate priorities." });
     }
 
-    return insights.slice(0, 6);
-  }, [productivityMetrics, tasks, habitInsight, goalInsight]);
+    // Weekly digest summary
+    const rangeSpan = dateRange ? differenceInDays(dateRange.to, dateRange.from) : 14;
+    if (rangeSpan >= 7) {
+      const weeklyAvg = Math.round(productivityMetrics.completedTasks / Math.max(rangeSpan / 7, 1));
+      insights.push({ type: 'info', message: `Weekly summary: You complete ~${weeklyAvg} tasks per week with a ${completionRate}% success rate across this period.` });
+    }
+
+    return insights.slice(0, 8);
+  }, [productivityMetrics, filteredTasks, habitInsight, goalInsight, dateRange]);
 
   return {
     productivityMetrics,
     dailyCompletionData,
     priorityDistribution,
     statusDistribution,
-    activityHeatmap,
     habitInsight,
     goalInsight,
     aiInsights,

@@ -1,11 +1,14 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTasks } from '@/hooks/useTasks';
 import { useHabits } from '@/hooks/useHabits';
 import { useGoals } from '@/hooks/useGoals';
-import { useAnalytics, AIInsight } from '@/hooks/useAnalytics';
-import { subMonths, endOfMonth } from 'date-fns';
+import { useAnalytics, AIInsight, DateRange } from '@/hooks/useAnalytics';
+import { subMonths, subDays, endOfMonth, format } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   ChartContainer, ChartTooltip, ChartTooltipContent,
 } from '@/components/ui/chart';
@@ -17,11 +20,9 @@ import {
 import {
   CheckCircle2, AlertTriangle, TrendingUp,
   Target, Repeat, BarChart3, Lightbulb, Info, Flame,
-  ListTodo, Activity
+  ListTodo, Activity, CalendarIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-
 
 function StatCard({ title, value, subtitle, icon: Icon, trend }: {
   title: string; value: string | number; subtitle?: string;
@@ -67,11 +68,25 @@ function InsightCard({ insight }: { insight: AIInsight }) {
   );
 }
 
+const PRESETS = [
+  { label: '7 Days', days: 7 },
+  { label: '14 Days', days: 14 },
+  { label: '30 Days', days: 30 },
+  { label: '90 Days', days: 90 },
+] as const;
+
 export default function Analytics() {
   const { loading: authLoading } = useAuth();
   const { tasks } = useTasks();
   const { habits, logs: habitLogs, streaks, loading: habitsLoading, fetchLogs } = useHabits();
   const { goals, loading: goalsLoading } = useGoals();
+
+  const [dateRange, setDateRange] = useState<DateRange>({
+    from: subDays(new Date(), 14),
+    to: new Date(),
+  });
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [selectingField, setSelectingField] = useState<'from' | 'to'>('from');
 
   useEffect(() => {
     const now = new Date();
@@ -81,7 +96,7 @@ export default function Analytics() {
   const {
     productivityMetrics, dailyCompletionData, priorityDistribution,
     statusDistribution, habitInsight, goalInsight, aiInsights,
-  } = useAnalytics(tasks, habits, habitLogs, streaks, goals);
+  } = useAnalytics(tasks, habits, habitLogs, streaks, goals, dateRange);
 
   const loading = authLoading || habitsLoading || goalsLoading;
 
@@ -103,12 +118,61 @@ export default function Analytics() {
     total: { label: 'Total', color: 'hsl(220, 70%, 55%)' },
   };
 
+  const handleDateSelect = (date: Date | undefined) => {
+    if (!date) return;
+    if (selectingField === 'from') {
+      setDateRange(prev => ({ ...prev, from: date }));
+      setSelectingField('to');
+    } else {
+      setDateRange(prev => ({ ...prev, to: date }));
+      setCalendarOpen(false);
+      setSelectingField('from');
+    }
+  };
+
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold">Analytics & Insights</h1>
-        <p className="text-muted-foreground">Track your productivity trends and get AI-powered recommendations</p>
+      {/* Header with Date Range */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold">Analytics & Insights</h1>
+          <p className="text-muted-foreground text-sm">Track productivity trends and get AI-powered recommendations</p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          {PRESETS.map(p => (
+            <Button
+              key={p.days}
+              variant="outline"
+              size="sm"
+              className="text-xs"
+              onClick={() => setDateRange({ from: subDays(new Date(), p.days), to: new Date() })}
+            >
+              {p.label}
+            </Button>
+          ))}
+
+          <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className="text-xs gap-1.5">
+                <CalendarIcon className="h-3.5 w-3.5" />
+                {format(dateRange.from, 'MMM dd')} – {format(dateRange.to, 'MMM dd')}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-3" align="end">
+              <p className="text-xs text-muted-foreground mb-2">
+                Selecting: <span className="font-medium">{selectingField === 'from' ? 'Start date' : 'End date'}</span>
+              </p>
+              <Calendar
+                mode="single"
+                selected={selectingField === 'from' ? dateRange.from : dateRange.to}
+                onSelect={handleDateSelect}
+                disabled={(date) => date > new Date()}
+                className="p-0 pointer-events-auto"
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
       </div>
 
       {/* Summary Cards */}
@@ -126,12 +190,11 @@ export default function Analytics() {
 
       {/* Charts Row 1 */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Task Completion Trend */}
         <Card className="lg:col-span-2">
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
               <Activity className="h-4 w-4 text-primary" />
-              Task Activity (Last 14 Days)
+              Task Activity
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -150,7 +213,6 @@ export default function Analytics() {
           </CardContent>
         </Card>
 
-        {/* Task Status Distribution */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
@@ -178,7 +240,6 @@ export default function Analytics() {
 
       {/* Charts Row 2 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Priority Distribution */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base">Task Priority Breakdown</CardTitle>
@@ -202,12 +263,11 @@ export default function Analytics() {
           </CardContent>
         </Card>
 
-        {/* Habit Daily Completion */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
               <Flame className="h-4 w-4 text-orange-500" />
-              Habit Check-ins (Last 14 Days)
+              Habit Check-ins
             </CardTitle>
           </CardHeader>
           <CardContent>
