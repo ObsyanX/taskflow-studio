@@ -144,8 +144,12 @@ export default function AboutPage() {
                   <div className="flex flex-col sm:flex-row items-center sm:items-start gap-8">
                     {/* Profile Photo */}
                     <div className="shrink-0">
-                      <div className="h-28 w-28 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 border-4 border-primary/10 shadow-lg flex items-center justify-center">
-                        <User className="h-12 w-12 text-primary" />
+                      <div className="h-28 w-28 rounded-full border-4 border-primary/10 shadow-lg overflow-hidden">
+                        <img
+                          src="https://res.cloudinary.com/dpmtulfdy/image/upload/v1774867601/creator-photo_oje6z6.png"
+                          alt="Profile"
+                          className="h-full w-full object-cover transition-transform duration-300 hover:scale-110"
+                        />
                       </div>
                     </div>
 
