@@ -9,7 +9,7 @@
       "dest": "/robots.txt"
     },
     {
-      "src": "/(.*)",
+      "src": "/((?!assets).*)",
       "dest": "/index.html"
     }
   ]
